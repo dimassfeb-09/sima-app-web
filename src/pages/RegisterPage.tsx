@@ -88,9 +88,12 @@ export default function RegisterPage() {
           <div className="flex flex-wrap items-center">
             <div className="hidden w-full xl:block xl:w-1/2">
               <div className="py-17.5 px-26 text-center flex flex-col gap-5 justify-center items-center py-10">
-                <Link className="mb-5.5 inline-block" to="/">
-                  <img src={logo} height={150} width={150} alt="Logo" />
-                </Link>
+                <img
+                  src={"../assets/logo/logo-no-background.png"}
+                  height={150}
+                  width={150}
+                  alt="Logo"
+                />
 
                 <p className="2xl:px-20">
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit
@@ -224,8 +227,7 @@ export default function RegisterPage() {
 
             <div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
               <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
-                <span className="mb-1.5 block font-medium">Start for free</span>
-                <h2 className="mb-9 text-2xl font-bold">Sign In to SIMA App</h2>
+                <h2 className="mb-9 text-2xl font-bold">Sign Up to SIMA App</h2>
 
                 <form
                   method="post"
@@ -334,7 +336,7 @@ export default function RegisterPage() {
                 <div className="mt-6 text-center">
                   <p>
                     Do you have account?{" "}
-                    <Link to="/auth/register" className="text-primary">
+                    <Link to="/auth/login" className="text-primary">
                       Sign In
                     </Link>
                   </p>
