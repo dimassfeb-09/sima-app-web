@@ -14,8 +14,6 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const logo = "assets/logo/logo-no-background.png";
-
   const navigate = useNavigate();
 
   const handleRegister = async () => {
