@@ -10,14 +10,11 @@ interface HereMapPageProps {
 export default function HereMapPage({ userInfo }: HereMapPageProps) {
   const [locationData, setLocationData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const [dataFetched, setDataFetched] = useState<boolean>(false);
 
   // Function to fetch location data based on instance type
   const fetchLocationData = useCallback(async (typeInstance: string) => {
     setLoading(true);
-    setError(null);
-
     try {
       const { data, error } = await supabase
         .from("organizations")
@@ -29,10 +26,8 @@ export default function HereMapPage({ userInfo }: HereMapPageProps) {
       }
 
       setLocationData(data || []);
-    } catch (error: any) {
-      setError(error.message);
-    } finally {
       setDataFetched(true);
+    } finally {
       setLoading(false);
     }
   }, []);

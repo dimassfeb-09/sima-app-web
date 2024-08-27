@@ -23,8 +23,6 @@ export default function MapComponent({
   userInfo: User | null;
 }) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<any>(null);
-
   useEffect(() => {
     if (window.H) {
       const defaultCenterLocation = findDefaultCenterLocation(
@@ -41,8 +39,6 @@ export default function MapComponent({
         addMapUI(mapInstance, defaultLayers);
         handleResize(mapInstance);
         addMarkersToMap(mapInstance, markers);
-
-        setMap(mapInstance);
 
         return () => cleanup(mapInstance);
       } else {
