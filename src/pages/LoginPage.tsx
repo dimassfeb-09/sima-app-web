@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { loginWithEmail } from "../models/auth";
 import { toast } from "react-toastify";
 import { EmailOutlined, Visibility, VisibilityOff } from "@mui/icons-material";
-import { getCountsAndSaveToLocalStorage } from "../models/organizations";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -17,7 +16,6 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await loginWithEmail(email, password);
-      await getCountsAndSaveToLocalStorage();
       toast.success("Berhasil Login");
       navigate("/");
     } catch (error: any) {

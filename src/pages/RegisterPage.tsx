@@ -12,7 +12,7 @@ import {
 import { createUser, deleteUserById } from "../models/user";
 import {
   createOrganization,
-  getCountsAndSaveToLocalStorage,
+  incrementCountByType,
 } from "../models/organizations";
 import { extractLatLong } from "../helpers/LatLng";
 
@@ -68,8 +68,7 @@ export default function RegisterPage() {
       if (createOrganizationError)
         throw new Error(createOrganizationError.message);
 
-      // Save counts to local storage and navigate
-      await getCountsAndSaveToLocalStorage();
+      await incrementCountByType(instance);
       toast.success("Berhasil daftar, selamat datang!");
       navigate("/");
     } catch (error: any) {

@@ -23,6 +23,15 @@ export const getUserInfo = async (): Promise<User | null> => {
       if (userError) throw new Error(`Error fetching user record: ${userError.message}`);
 
       if (userRecord) {
+        // Fetch location instance for the user
+        const { error: locationError } = await supabase
+          .from('organizations')
+          .select('instance_type')
+          .eq('user_id', userRecord.id)
+          .maybeSingle();
+ 
+        if (locationError) throw new Error(`Error fetching location instance: ${locationError.message}`);
+
         return {
           user_id: userRecord.id,
           full_name: userRecord.full_name,

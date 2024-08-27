@@ -98,27 +98,51 @@ export const deleteOrganization = async (id: string): Promise<Result<any>> => {
   return { data, error};
 };
 
-export const getCountsAndSaveToLocalStorage = async () => {
+
+export const getCountByType = async (type: string)  => {
   try {
-    const instanceTypes = ["ambulance", "police", "firefighter"];
+    const { data, error } = await supabase
+      .from("counts")
+      .select("title, value")
+      .eq("title", type)
+      .single(); 
 
-    const results = await Promise.all(
-      instanceTypes.map((type) =>
-        supabase
-          .from("organization")
-          .select("*")
-          .eq("instance_type", type)
-      )
-    );
-
-    const counts = results.map((res) => res.data?.length || 0);
-
-    instanceTypes.forEach((type, index) => {
-      localStorage.setItem(`${type}Count`, counts[index].toString());
-    });
-
-    console.log("Data saved to local storage");
+    if (error) {
+      throw error;
+    } 
+ 
+    return data;
   } catch (error) {
-    console.error("Error fetching or saving data:", error);
+    console.error("Error fetching count by type:", error);
+    return null;
+  }
+};
+ 
+
+
+export const incrementCountByType = async (type: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("counts")
+      .select("value")
+      .eq("title", type)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    const newValue = (data?.value || 0) + 1;
+
+    const { error: updateError } = await supabase
+      .from("counts")
+      .update({ value: newValue })
+      .eq("title", type);
+
+    if (updateError) {
+      throw updateError;
+    }
+  } catch (error) {
+    console.error("Error incremnet count by type:", error);
   }
 };

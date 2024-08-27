@@ -55,7 +55,7 @@ const NavBar = ({ userInfo }: { userInfo: User | null }) => {
 
             <li className="block p-1 font-sans text-sm antialiased font-medium leading-normal text-blue-gray-900">
               <Link
-                to="/"
+                to="/report"
                 className="flex gap-4 items-center transition-colors hover:text-blue-500"
               >
                 <Assignment />
