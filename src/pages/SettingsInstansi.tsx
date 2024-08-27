@@ -10,23 +10,21 @@ export default function SettingsInstansi({
 }: {
   userInfo: User | null;
 }) {
-  const [name, setName] = useState<string>(userInfo?.displayName ?? "");
+  const [name, setName] = useState<string>(userInfo?.full_name ?? "");
   const [latLong, setLatLong] = useState<string>("");
   const [instance, setInstance] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (userInfo?.user_id) {
-      const fetchData = async () => {
+  const fetchData = async () => {
+    try {
+      if (userInfo?.user_id) {
         const { data: existingRecord, error: fetchError } = await supabase
-          .from("location_instance")
+          .from("organizations")
           .select("*")
-          .eq("user_id", userInfo.user_id)
-          .single();
+          .eq("user_id", userInfo?.user_id)
+          .maybeSingle();
 
         if (fetchError) {
-          toast.error(`Error fetching data: ${fetchError.message}`);
-          return;
+          throw new Error(fetchError.message);
         }
 
         if (existingRecord) {
@@ -36,12 +34,20 @@ export default function SettingsInstansi({
               existingRecord.longitude || ""
             }`
           );
-          setInstance(existingRecord.type_instance || "");
+          setInstance(existingRecord.instance_type || "");
+        } else {
+          setName(userInfo.full_name ?? "");
+          setLatLong("");
+          setInstance("");
         }
-      };
-
-      fetchData();
+      }
+    } catch (e) {
+      toast.error(`Error fetching data: ${e}`);
     }
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [userInfo]);
 
   const handleSubmit = async () => {
@@ -55,26 +61,26 @@ export default function SettingsInstansi({
         throw new Error("Invalid latitude or longitude");
       }
 
-      // Check if an entry with the same user_id already exists
       const { data: existingRecord, error: fetchError } = await supabase
-        .from("location_instance")
+        .from("organizations")
         .select("*")
         .eq("user_id", userInfo?.user_id)
-        .single(); // Use `.single()` to fetch a single record
+        .maybeSingle();
 
       if (fetchError) {
-        throw new Error(`Fetch failed: ${fetchError.message}`);
+        throw new Error(
+          `Fetch error (${fetchError.code}): ${fetchError.message}`
+        );
       }
 
       if (existingRecord) {
-        // If an existing record is found, update it
         const { error: updateError } = await supabase
-          .from("location_instance")
+          .from("organizations")
           .update({
             name,
             latitude,
             longitude,
-            type_instance: instance,
+            instance_type: instance,
           })
           .eq("user_id", userInfo?.user_id);
 
@@ -84,16 +90,15 @@ export default function SettingsInstansi({
 
         toast.success("Data updated successfully!");
       } else {
-        // If no existing record is found, insert a new record
         const { error: insertError } = await supabase
-          .from("location_instance")
+          .from("organizations")
           .insert([
             {
               name,
               latitude,
               longitude,
               user_id: userInfo?.user_id,
-              type_instance: instance,
+              instance_type: instance,
             },
           ]);
 
@@ -106,6 +111,7 @@ export default function SettingsInstansi({
     } catch (error: any) {
       toast.error(`Error: ${error.message}`);
     } finally {
+      fetchData(); // Refresh data after operation
       setLoading(false);
     }
   };
@@ -131,7 +137,7 @@ export default function SettingsInstansi({
             <label className="mb-2.5 block font-medium">Name</label>
             <div className="relative">
               <input
-                disabled={userInfo?.displayName !== null}
+                disabled={userInfo?.full_name !== null}
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -183,7 +189,11 @@ export default function SettingsInstansi({
           </div>
 
           <button className="mb-5 w-full" disabled={loading}>
-            <div className="w-full text-center cursor-pointer rounded-lg border border-primary bg-blue-900 text-white p-4 transition hover:bg-opacity-90">
+            <div
+              className={`w-full text-center cursor-pointer rounded-lg border border-primary ${
+                !loading ? "bg-blue-900" : "bg-gray-300"
+              } text-white p-4 transition hover:bg-opacity-90`}
+            >
               {loading ? "Loading..." : "Simpan "}
             </div>
           </button>

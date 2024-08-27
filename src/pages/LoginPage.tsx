@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginWithEmail, loginWithGoogle } from "../models/auth";
+import { loginWithEmail } from "../models/auth";
 import { toast } from "react-toastify";
-import supabase from "../utils/supabase";
-import { EmailOutlined, Google, LockOutlined } from "@mui/icons-material";
+import { EmailOutlined, Visibility, VisibilityOff } from "@mui/icons-material";
+import { getCountsAndSaveToLocalStorage } from "../models/organizations";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -26,56 +27,13 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      await loginWithGoogle();
-      await getCountsAndSaveToLocalStorage();
-      toast.success("Berhasil Login dengan Google");
-      navigate("/");
-    } catch (error: any) {
-      toast.error(`Gagal Login: ${error.message}`);
-    }
-  };
-
-  const getCountsAndSaveToLocalStorage = async () => {
-    try {
-      const [ambulanceRes, policeRes, firefighterRes] = await Promise.all([
-        supabase
-          .from("location_instance")
-          .select("*")
-          .eq("type_instance", "ambulance"),
-        supabase
-          .from("location_instance")
-          .select("*")
-          .eq("type_instance", "police"),
-        supabase
-          .from("location_instance")
-          .select("*")
-          .eq("type_instance", "firefighter"),
-      ]);
-
-      const ambulanceCount = ambulanceRes.data?.length || 0;
-      const policeCount = policeRes.data?.length || 0;
-      const firefighterCount = firefighterRes.data?.length || 0;
-
-      localStorage.setItem("ambulanceCount", ambulanceCount.toString());
-      localStorage.setItem("policeCount", policeCount.toString());
-      localStorage.setItem("firefighterCount", firefighterCount.toString());
-
-      console.log("Data saved to local storage");
-    } catch (error) {
-      console.error("Error fetching or saving data:", error);
-      toast.error("Gagal menyimpan data");
-    }
-  };
-
   return (
     <>
-      <div className="flex justify-center items-center h-screen w-full">
-        <div className="rounded-sm border border-stroke bg-white shadow-default border-strokedark bg-boxdark">
-          <div className="flex flex-wrap items-center">
-            <div className="hidden w-full xl:block xl:w-1/2">
-              <div className="py-17.5 px-26 text-center flex flex-col gap-5 justify-center items-center py-10">
+      <div className="flex justify-center items-center h-screen w-full ">
+        <div className="rounded-sm border-none sm:border w-full mx-3 sm:mx-10 md:min-w-min sm:border-stroke bg-white shadow-default sm:border-strokedark bg-boxdark">
+          <div className="flex w-full ">
+            <div className="hidden p-5 w-full xl:block xl:w-1/2">
+              <div className="py-17.5 xl:px-26 text-center flex flex-col gap-5 justify-center items-center py-10">
                 <img
                   src={"../assets/logo/logo-no-background.png"}
                   height={150}
@@ -213,9 +171,9 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="w-full border-stroke border-strokedark xl:w-1/2 xl:border-l-2">
-              <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
-                <h2 className="mb-9 text-2xl font-bold">Sign In to SIMA App</h2>
+            <div className="w-full  xl:block border-stroke border-strokedark xl:w-1/2 xl:border-l-2">
+              <div className="w-full p-10 md:p-12.5 xl:p-17.5">
+                <h2 className="mb-9 text-2xl font-bold">Masuk SIMA App</h2>
 
                 <form
                   method="post"
@@ -242,18 +200,22 @@ export default function LoginPage() {
 
                   <div className="mb-6">
                     <label className="mb-2.5 block font-medium  ">
-                      Re-type Password
+                      Password
                     </label>
                     <div className="relative">
                       <input
                         onChange={(e) => setPassword(e.target.value)}
-                        type="password"
+                        type={showPassword ? "text" : "password"}
+                        value={password}
                         placeholder="6+ Characters, 1 Capital letter"
                         className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10  outline-none focus:border-primary focus-visible:shadow-none border-form-strokedark bg-form-input  focus:border-primary"
                       />
 
-                      <span className="absolute right-4 top-4">
-                        <LockOutlined />
+                      <span
+                        className="absolute right-4 top-4"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
                       </span>
                     </div>
                   </div>
@@ -264,22 +226,6 @@ export default function LoginPage() {
                     </div>
                   </button>
                 </form>
-
-                <div
-                  onClick={loading ? undefined : handleGoogleLogin}
-                  className="flex w-full items-center justify-center cursor-pointer gap-3.5 rounded-lg border border-stroke bg-gray p-4 border-strokedark bg-meta-4 hover:bg-opacity-50"
-                >
-                  {loading ? (
-                    <div>Loading...</div>
-                  ) : (
-                    <>
-                      <span>
-                        <Google />{" "}
-                      </span>
-                      Sign in with Google
-                    </>
-                  )}
-                </div>
 
                 <div className="mt-6 text-center">
                   <p>

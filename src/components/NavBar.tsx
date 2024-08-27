@@ -90,7 +90,7 @@ const NavBar = ({ userInfo }: { userInfo: User | null }) => {
                 role="menuitem"
               >
                 <PersonOutline />{" "}
-                <span className="font-bold">{userInfo?.displayName}</span>
+                <span className="font-bold">{userInfo?.full_name}</span>
               </div>
 
               <Link

@@ -1,91 +1,105 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginWithGoogle, registerWithEmail } from "../models/auth";
+import { registerWithEmail } from "../models/auth";
 import { toast } from "react-toastify";
-import supabase from "../utils/supabase";
 import {
   EmailOutlined,
-  LockOutlined,
+  MapOutlined,
   PersonOutline,
+  Visibility,
+  VisibilityOff,
 } from "@mui/icons-material";
+import { createUser, deleteUserById } from "../models/user";
+import {
+  createOrganization,
+  getCountsAndSaveToLocalStorage,
+} from "../models/organizations";
+import { extractLatLong } from "../helpers/LatLng";
 
 export default function RegisterPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [isConfirmPasswordMatch, setIsConfirmPasswordMatch] =
+    useState<boolean>(false);
+  const [instance, setInstance] = useState<string>("");
+  const [latLong, setLatLong] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
   const handleRegister = async () => {
+    if (password !== confirmPassword) {
+      toast.error("Password dan konfirmasi password tidak cocok");
+      return;
+    }
+
+    const latLongExtracted = extractLatLong(latLong);
+    let userId: string | null = null;
+
     try {
+      // Register user
       const { user } = await registerWithEmail(name, email, password);
+      if (!user) throw new Error("User registration failed");
 
-      const uid = user?.uid;
+      // Create user in the database
+      const { data: userId, error: createUserError } = await createUser({
+        uid: user.uid,
+        full_name: name,
+        email: email,
+        account_type: instance,
+      });
+      if (createUserError) throw new Error(createUserError.message);
+      if (!userId) throw new Error("Failed to get user ID");
 
-      const { error: insertError } = await supabase.from("users").insert([
-        {
-          uid: uid,
-          full_name: name,
-          email: email,
-        },
-      ]);
+      // Create location instance
+      const newOrganizations = {
+        name: name,
+        latitude: latLongExtracted?.latitude,
+        longitude: latLongExtracted?.longitude,
+        user_id: userId,
+        instance_type: instance,
+      };
 
-      if (insertError) {
-        console.log(insertError.message);
-        throw new Error(insertError.message);
-      }
+      const { error: createOrganizationError } = await createOrganization(
+        newOrganizations
+      );
+      if (createOrganizationError)
+        throw new Error(createOrganizationError.message);
 
+      // Save counts to local storage and navigate
       await getCountsAndSaveToLocalStorage();
       toast.success("Berhasil daftar, selamat datang!");
       navigate("/");
     } catch (error: any) {
-      console.log(error);
+      console.error("Registration error:", error);
+
+      // Rollback: Delete the user if created
+      if (userId) {
+        try {
+          await deleteUserById(userId);
+          toast.info("User account removed due to registration failure.");
+        } catch (deleteError) {
+          console.error("Error deleting user:", deleteError);
+        }
+      }
 
       toast.error(`Gagal Register: ${error.message}`);
     }
   };
 
-  const handleGoogleRegister = async () => {
-    try {
-      await loginWithGoogle();
-      await getCountsAndSaveToLocalStorage();
-      toast.success("Berhasil Daftar dengan Google");
-      navigate("/");
-    } catch (error: any) {
-      toast.error(`Gagal Register: ${error.message}`);
-    }
-  };
-
-  const getCountsAndSaveToLocalStorage = async () => {
-    try {
-      const [ambulanceRes, policeRes, firefighterRes] = await Promise.all([
-        supabase.from("location_ambulance").select("*"),
-        supabase.from("location_police").select("*"),
-        supabase.from("location_firefighter").select("*"),
-      ]);
-
-      const ambulanceCount = ambulanceRes.data?.length || 0;
-      const policeCount = policeRes.data?.length || 0;
-      const firefighterCount = firefighterRes.data?.length || 0;
-
-      localStorage.setItem("ambulanceCount", ambulanceCount.toString());
-      localStorage.setItem("policeCount", policeCount.toString());
-      localStorage.setItem("firefighterCount", firefighterCount.toString());
-
-      console.log("Data saved to local storage");
-    } catch (error) {
-      console.error("Error fetching or saving data:", error);
-      toast.error("Gagal menyimpan data");
-    }
-  };
+  useEffect(() => {
+    setIsConfirmPasswordMatch(password === confirmPassword);
+  }, [password, confirmPassword]);
 
   return (
     <>
-      <div className="flex justify-center items-center h-screen w-full">
-        <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-          <div className="flex flex-wrap items-center">
-            <div className="hidden w-full xl:block xl:w-1/2">
-              <div className="py-17.5 px-26 text-center flex flex-col gap-5 justify-center items-center py-10">
+      <div className="flex justify-center items-center h-screen w-full ">
+        <div className="rounded-sm border-none sm:border  w-full mx-3 sm:mx-10 md:min-w-min border-stroke bg-white shadow-default border-strokedark bg-boxdark">
+          <div className="flex w-full justify-center items-center">
+            <div className="hidden p-5 w-full xl:block xl:w-1/2">
+              <div className="py-17.5 xl:px-26 text-center flex flex-col gap-5 justify-center items-center py-10">
                 <img
                   src={"../assets/logo/logo-no-background.png"}
                   height={150}
@@ -223,9 +237,11 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
-              <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
-                <h2 className="mb-9 text-2xl font-bold">Sign Up to SIMA App</h2>
+            <div className="w-full xl:block border-stroke border-strokedark xl:w-1/2 xl:border-l-2">
+              <div className="w-full p-10 md:p-12.5 xl:p-17.5">
+                <h2 className="mb-9 text-2xl font-bold">
+                  Daftar Akun SIMA App
+                </h2>
 
                 <form
                   method="post"
@@ -240,6 +256,7 @@ export default function RegisterPage() {
                       <input
                         type="text"
                         onChange={(e) => setName(e.target.value)}
+                        value={name}
                         placeholder="Enter your name"
                         className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input  dark:focus:border-primary"
                       />
@@ -256,6 +273,7 @@ export default function RegisterPage() {
                       <input
                         type="email"
                         onChange={(e) => setEmail(e.target.value)}
+                        value={email}
                         placeholder="Enter your email"
                         className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input  dark:focus:border-primary"
                       />
@@ -266,22 +284,95 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
-                  <div className="mb-6">
+                  <div className="mb-4 w-full">
+                    <label className="mb-2.5 block font-medium">
+                      Pilih Instansi
+                    </label>
+                    <div className="relative">
+                      <select
+                        className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-3 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none border-form-strokedark bg-form-input focus:border-primary"
+                        value={instance}
+                        onChange={(e) => setInstance(e.target.value)}
+                      >
+                        <option value="" disabled>
+                          Pilih salah satu instansi
+                        </option>
+                        <option value="ambulance">
+                          Ambulans / Rumah Sakit
+                        </option>
+                        <option value="police">Polisi</option>
+                        <option value="firefighter">Pemadam Kebakaran</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="mb-4 w-full">
+                    <label className="mb-2.5 block font-medium">
+                      Latitude, Longitude (Contoh: -6.2238477,106.9694887)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={latLong}
+                        onChange={(e) => setLatLong(e.target.value)}
+                        placeholder="Enter your (latitude, longitude)"
+                        className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-3 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none border-form-strokedark bg-form-input  focus:border-primary"
+                      />
+
+                      <span className="absolute right-4 top-4">
+                        <MapOutlined />
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
                     <label className="mb-2.5 block font-medium  ">
-                      Re-type Password
+                      Kata Sandi
                     </label>
                     <div className="relative">
                       <input
                         onChange={(e) => setPassword(e.target.value)}
-                        type="password"
+                        value={password}
+                        type={showPassword ? "text" : "password"}
                         placeholder="6+ Characters, 1 Capital letter"
                         className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10  outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input  dark:focus:border-primary"
                       />
 
-                      <span className="absolute right-4 top-4">
-                        <LockOutlined />
+                      <span
+                        className="absolute right-4 top-4 cursor-pointer"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
                       </span>
                     </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="mb-2.5 block font-medium ">
+                      Konfirmasi Kata Sandi
+                    </label>
+                    <div className="relative">
+                      <input
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        value={confirmPassword}
+                        type={showPassword ? "text" : "password"}
+                        placeholder="6+ Characters, 1 Capital letter"
+                        className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10  outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input  dark:focus:border-primary"
+                      />
+
+                      <span
+                        className="absolute right-4 top-4 cursor-pointer"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </span>
+                    </div>
+
+                    <span className="text-xs text-red-500">
+                      {!isConfirmPasswordMatch
+                        ? "Konfirmasi kata sandi tidak cocok"
+                        : null}
+                    </span>
                   </div>
 
                   <button className="mb-5 w-full">
@@ -290,46 +381,6 @@ export default function RegisterPage() {
                     </div>
                   </button>
                 </form>
-
-                <div
-                  onClick={handleGoogleRegister}
-                  className="flex w-full items-center justify-center gap-3.5 rounded-lg border border-stroke bg-gray p-4 hover:bg-opacity-50 dark:border-strokedark dark:bg-meta-4 dark:hover:bg-opacity-50"
-                >
-                  <span>
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 20 20"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <g clipPath="url(#clip0_191_13499)">
-                        <path
-                          d="M19.999 10.2217C20.0111 9.53428 19.9387 8.84788 19.7834 8.17737H10.2031V11.8884H15.8266C15.7201 12.5391 15.4804 13.162 15.1219 13.7195C14.7634 14.2771 14.2935 14.7578 13.7405 15.1328L13.7209 15.2571L16.7502 17.5568L16.96 17.5774C18.8873 15.8329 19.9986 13.2661 19.9986 10.2217"
-                          fill="#4285F4"
-                        />
-                        <path
-                          d="M10.2055 19.9999C12.9605 19.9999 15.2734 19.111 16.9629 17.5777L13.7429 15.1331C12.8813 15.7221 11.7248 16.1333 10.2055 16.1333C8.91513 16.1259 7.65991 15.7205 6.61791 14.9745C5.57592 14.2286 4.80007 13.1801 4.40044 11.9777L4.28085 11.9877L1.13101 14.3765L1.08984 14.4887C1.93817 16.1456 3.24007 17.5386 4.84997 18.5118C6.45987 19.4851 8.31429 20.0004 10.2059 19.9999"
-                          fill="#34A853"
-                        />
-                        <path
-                          d="M4.39899 11.9777C4.1758 11.3411 4.06063 10.673 4.05807 9.99996C4.06218 9.32799 4.1731 8.66075 4.38684 8.02225L4.38115 7.88968L1.19269 5.4624L1.0884 5.51101C0.372763 6.90343 0 8.4408 0 9.99987C0 11.5589 0.372763 13.0963 1.0884 14.4887L4.39899 11.9777Z"
-                          fill="#FBBC05"
-                        />
-                        <path
-                          d="M10.2059 3.86663C11.668 3.84438 13.0822 4.37803 14.1515 5.35558L17.0313 2.59996C15.1843 0.901848 12.7383 -0.0298855 10.2059 -3.6784e-05C8.31431 -0.000477834 6.4599 0.514732 4.85001 1.48798C3.24011 2.46124 1.9382 3.85416 1.08984 5.51101L4.38946 8.02225C4.79303 6.82005 5.57145 5.77231 6.61498 5.02675C7.65851 4.28118 8.9145 3.87541 10.2059 3.86663Z"
-                          fill="#EB4335"
-                        />
-                      </g>
-                      <defs>
-                        <clipPath id="clip0_191_13499">
-                          <rect width="20" height="20" fill="white" />
-                        </clipPath>
-                      </defs>
-                    </svg>
-                  </span>
-                  Sign Up with Google
-                </div>
 
                 <div className="mt-6 text-center">
                   <p>

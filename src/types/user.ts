@@ -1,8 +1,8 @@
 export interface User {
-  user_id: number;
-    uid: string;
-    email: string | null;
-    displayName: string | null;
-    photoURL: string | null;
+  user_id?: number | null;
+  uid: string | null;
+  full_name: string | null;
+  email: string | null;
+  photoURL?: string | null;
+  account_type: string | null;
   }
-  

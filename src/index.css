@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.info-box {
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  white-space: pre-line; /* For newline support */
+  z-index: 1000; /* Ensure it's above other elements */
+  position: absolute; /* Ensure it's positioned relative to the map */
+  transform: translateX(-50%) translateY(60%); /* Move the box slightly above the marker */
+}

@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@emotion/styled": "^11.13.0",
+    "@here/maps-api-for-javascript": "^1.56.1",
     "@mui/icons-material": "^5.16.7",
     "@supabase/supabase-js": "^2.45.1",
     "firebase": "^10.13.0",
@@ -18,7 +19,7 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.1",
     "react-toastify": "^10.0.5",
-    "rollup": "^4.21.0"
+    "rollup": "^4.21.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",

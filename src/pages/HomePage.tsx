@@ -6,6 +6,7 @@ import {
 } from "@mui/icons-material";
 import { User } from "../types/user";
 import NavBar from "../components/NavBar";
+import HereMapPage from "./HereMapPage";
 
 export default function HomePage({ userInfo }: { userInfo: User | null }) {
   const [policeCount, setPoliceCount] = useState<string>("0");
@@ -22,9 +23,9 @@ export default function HomePage({ userInfo }: { userInfo: User | null }) {
     <div className="bg-[#f0f5f9]">
       <NavBar userInfo={userInfo} />
 
-      <div className=" w-full flex flex-col gap-5 py-10 px-5 md:px-36 ">
+      <div className="w-full flex flex-col gap-5 py-10 px-5 md:px-36">
         <div className="flex flex-col md:flex-row gap-5 w-full">
-          <div className="flex items-center gap-7 border px-5 py-10 w-full md:1/2 lg:w-3/4 bg-white">
+          <div className="flex items-center gap-7 border px-5 py-10 w-full md:w-1/2 lg:w-3/4 bg-white">
             <div>
               <LocalPolice style={{ height: 70, width: 70 }} />
             </div>
@@ -34,7 +35,7 @@ export default function HomePage({ userInfo }: { userInfo: User | null }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-7 border px-5 py-10 w-full md:1/2 lg:w-3/4 bg-white">
+          <div className="flex items-center gap-7 border px-5 py-10 w-full md:w-1/2 lg:w-3/4 bg-white">
             <div>
               <LocalFireDepartment style={{ height: 70, width: 70 }} />
             </div>
@@ -44,7 +45,7 @@ export default function HomePage({ userInfo }: { userInfo: User | null }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-7 border px-5 py-10 w-full md:1/2 lg:w-3/4 bg-white">
+          <div className="flex items-center gap-7 border px-5 py-10 w-full md:w-1/2 lg:w-3/4 bg-white">
             <div>
               <LocalHospital style={{ height: 70, width: 70 }} />
             </div>
@@ -54,6 +55,10 @@ export default function HomePage({ userInfo }: { userInfo: User | null }) {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="absolute flex justify-center items-center w-[500px]">
+        <HereMapPage userInfo={userInfo} />
       </div>
     </div>
   );
