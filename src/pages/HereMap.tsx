@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { User } from "../types/user";
 
 // Extend the Window interface to include HERE Maps types
