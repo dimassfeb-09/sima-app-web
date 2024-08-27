@@ -1,22 +1,5 @@
 import supabase from "../utils/supabase";
 
-interface ReportAssignment {
-  report_id: number;
-  report_title: string;
-  report_description: string;
-  report_status: string;
-  report_latitude: number;
-  report_longitude: number;
-  report_user_id: number;
-  organization_name: string;
-  organization_latitude: number;
-  organization_longitude: number;
-  organization_user_id: number;
-  assigned_at: string;
-  assignment_status: string;
-  assignment_distance: number;
-}
-
 export async function fetchReportById(reportId: number) {
     const { data, error } = await supabase
       .from('report_assignments')
