@@ -6,7 +6,6 @@ import {
 } from "@mui/icons-material";
 import { User } from "../types/user";
 import NavBar from "../components/NavBar";
-import HereMapPage from "./HereMapPage";
 import { getCountByType } from "../models/organizations";
 
 export default function HomePage({ userInfo }: { userInfo: User | null }) {
@@ -77,12 +76,8 @@ export default function HomePage({ userInfo }: { userInfo: User | null }) {
               </div>
             </div>
           </div>
-
-          <div className="absolute flex justify-center items-center w-[500px]">
-            <HereMapPage userInfo={userInfo} />
-          </div>
         </>
-      )}{" "}
+      )}
     </div>
   );
 }

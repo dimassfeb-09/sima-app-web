@@ -60,10 +60,7 @@ export default function ReportPage({ userInfo }: { userInfo: User | null }) {
             }
           }}
         >
-          <div
-            className="relative p-4 w-3/4"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className=" p-4 w-3/4" onClick={(e) => e.stopPropagation()}>
             <div className="relative bg-white h-full rounded-lg shadow">
               <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                 <h3 className="text-xl font-semibold text-gray-900">
@@ -174,7 +171,7 @@ export default function ReportPage({ userInfo }: { userInfo: User | null }) {
       )}
 
       <div className="px-5 sm:px-10 pt-5">
-        <div className="relative h-[49rem] overflow-x-auto shadow-md sm:rounded-lg">
+        <div className=" h-[49rem] overflow-x-auto shadow-md sm:rounded-lg">
           <table className="w-full text-sm text-left rtl:text-right text-gray-500">
             <thead className="text-xs text-gray-700 uppercase bg-gray-50">
               <tr>

@@ -10,7 +10,6 @@ import NotFoundPage from "./pages/NotFoundPage";
 import LoadingPage from "./pages/LoadingPage";
 import RegisterPage from "./pages/RegisterPage";
 import SettingsInstansi from "./pages/SettingsInstansi";
-import HereMapPage from "./pages/HereMapPage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Toast } from "./components/Toast";
@@ -23,6 +22,7 @@ import { fetchOrganizationByUserId } from "./models/organizations";
 
 import { User } from "./types/user";
 import ReportPage from "./pages/ReportPage";
+import MapsReportPage from "./pages/MapsReportPage";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -103,10 +103,14 @@ function App() {
       <Routes>
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/register" element={<RegisterPage />} />
-        <Route path="/maps" element={<HereMapPage userInfo={userInfo} />} />
         <Route element={<ProtectedRoute isLoggedIn={isLoggedIn} />}>
           <Route path="/" element={<HomePage userInfo={userInfo} />} />
           <Route path="/report" element={<ReportPage userInfo={userInfo} />} />
+          <Route
+            path="/report_maps"
+            element={<MapsReportPage userInfo={userInfo} />}
+          />
+
           <Route
             path="/settings/instansi"
             element={<SettingsInstansi userInfo={userInfo} />}
