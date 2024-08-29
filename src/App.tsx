@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 
 import LoginPage from "./pages/LoginPage";
@@ -14,7 +14,6 @@ import SettingsInstansi from "./pages/SettingsInstansi";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import { auth } from "./utils/firebase";
-import supabase from "./utils/supabase";
 
 import { getUserInfo } from "./models/user";
 import { fetchOrganizationByUserId } from "./models/organizations";
@@ -73,7 +72,6 @@ function App() {
     organizationId: organizationId!,
     showingToast: true,
   });
-
 
   if (isLoading) {
     return <LoadingPage />;

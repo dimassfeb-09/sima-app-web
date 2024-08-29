@@ -6,7 +6,6 @@ import {
   PersonOutline,
   Settings,
   Menu as MenuIcon,
-  ArrowUpward,
 } from "@mui/icons-material";
 import { signOut } from "firebase/auth";
 import { useState } from "react";
