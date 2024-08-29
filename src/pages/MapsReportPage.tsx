@@ -2,23 +2,24 @@ import { useEffect, useState } from "react";
 import NavBar from "../components/NavBar";
 import { fetchOrganizationByUserId } from "../models/organizations";
 import { fetchReportsByOrganizationId } from "../models/report";
-import { User } from "../types/user";
-import { Marker } from "../models/marker";
+import { Users } from "../types/user";
+import { Marker } from "../types/marker";
 import HereMapPage from "./HereMapPage";
 
 export default function MapsReportPage({
   userInfo,
 }: {
-  userInfo: User | null;
+  userInfo: Users | null;
 }) {
-  const [reports, setReports] = useState<Marker[]>([]); // Define type according to your report structure
+  const [reports, setReports] = useState<Marker[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (userInfo?.user_id) {
+      if (userInfo?.id) {
+        setLoading(true);
         try {
-          // Fetch organization ID based on user ID
-          const orgResponse = await fetchOrganizationByUserId(userInfo.user_id);
+          const orgResponse = await fetchOrganizationByUserId(userInfo.id);
           if (orgResponse?.data) {
             const organizationId = orgResponse.data.id;
             const reportsResponse = await fetchReportsByOrganizationId(
@@ -39,6 +40,8 @@ export default function MapsReportPage({
           }
         } catch (error) {
           console.error("Failed to fetch data", error);
+        } finally {
+          setLoading(false);
         }
       }
     };
@@ -49,9 +52,15 @@ export default function MapsReportPage({
   return (
     <>
       <NavBar userInfo={userInfo} />
-      <div className="absolute flex justify-center items-center ">
-        <HereMapPage markers={reports} userInfo={userInfo} />
-      </div>
+      {loading ? (
+        <div className="flex justify-center items-center h-screen w-screen absolute top-0 left-0 bg-white">
+          <p>Loading...</p>
+        </div>
+      ) : (
+        <div className="absolute flex justify-center items-center">
+          <HereMapPage markers={reports} userInfo={userInfo} />
+        </div>
+      )}
     </>
   );
 }

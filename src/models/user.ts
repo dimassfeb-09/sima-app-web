@@ -1,12 +1,13 @@
 import { auth } from '../utils/firebase'; // Adjust the import path
-import { User } from '../types/user'; // Adjust the import path
+import { Users } from '../types/user'; // Adjust the import path
 import supabase from '../utils/supabase';
+
 
 // Constants for retry logic
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 1000; // in milliseconds
 
-export const getUserInfo = async (): Promise<User | null> => {
+export const getUserInfo = async (): Promise<Users | null> => {
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       const currentUser = auth.currentUser;
@@ -18,30 +19,17 @@ export const getUserInfo = async (): Promise<User | null> => {
         .from('users')
         .select('*')
         .eq('uid', currentUser.uid)
-        .single();
+        .maybeSingle();
 
       if (userError) throw new Error(`Error fetching user record: ${userError.message}`);
 
       if (userRecord) {
-        // Fetch location instance for the user
-        const { error: locationError } = await supabase
-          .from('organizations')
-          .select('instance_type')
-          .eq('user_id', userRecord.id)
-          .maybeSingle();
- 
-        if (locationError) throw new Error(`Error fetching location instance: ${locationError.message}`);
-
-        return {
-          user_id: userRecord.id,
-          full_name: userRecord.full_name,
-          account_type: userRecord.account_type,
-          photoURL: currentUser.photoURL,
-          uid: currentUser.uid,
-          email: currentUser.email,
-          };
+        return userRecord as Users;
       }
+
     } catch (error) {
+      console.log(error);
+      
       if (attempt < MAX_RETRIES) {
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
       } else {
@@ -53,8 +41,9 @@ export const getUserInfo = async (): Promise<User | null> => {
   return null;
 };
 
+
 // Function to create a new user in the database
-export const createUser = async (user: User) => {
+export const createUser = async (user: any) => {
   const { data, error } = await supabase
     .from('users')
     .insert([user])
@@ -83,7 +72,7 @@ export const fetchUserByUid = async (uid: string) => {
 };
 
 // Function to update a user's information
-export const updateUser = async (uid: string, updates: Partial<User>) => {
+export const updateUser = async (uid: string, updates: Partial<Users>) => {
   const { data, error } = await supabase.from('users').update(updates).eq('uid', uid);
   return { data, error };
 };

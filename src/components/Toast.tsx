@@ -1,4 +1,4 @@
-export const Toast = ({
+const Toasts = ({
   idReport,
   title,
 }: {
@@ -20,3 +20,6 @@ export const Toast = ({
     </a>
   </div>
 );
+
+
+export default Toasts;

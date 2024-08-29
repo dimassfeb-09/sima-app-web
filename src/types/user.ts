@@ -1,8 +1,9 @@
-export interface User {
-  user_id?: number | null;
-  uid: string | null;
-  full_name: string | null;
-  email: string | null;
-  photoURL?: string | null;
-  account_type: string | null;
+  export interface Users {
+    id: number;
+    uid: string;
+    full_name: string;
+    email: string;
+    nik: string;
+    created_at: string,
+    account_type: string;
   }

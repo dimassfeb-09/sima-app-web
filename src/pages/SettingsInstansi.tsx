@@ -1,6 +1,6 @@
 import { MapOutlined, PersonOutline } from "@mui/icons-material";
 import NavBar from "../components/NavBar";
-import { User } from "../types/user";
+import { Users } from "../types/user";
 import { useEffect, useState } from "react";
 import supabase from "../utils/supabase";
 import { toast } from "react-toastify";
@@ -8,19 +8,19 @@ import { toast } from "react-toastify";
 export default function SettingsInstansi({
   userInfo,
 }: {
-  userInfo: User | null;
+  userInfo: Users | null;
 }) {
   const [name, setName] = useState<string>(userInfo?.full_name ?? "");
   const [latLong, setLatLong] = useState<string>("");
-  const [instance, setInstance] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+
   const fetchData = async () => {
     try {
-      if (userInfo?.user_id) {
+      if (userInfo?.id) {
         const { data: existingRecord, error: fetchError } = await supabase
           .from("organizations")
           .select("*")
-          .eq("user_id", userInfo?.user_id)
+          .eq("user_id", userInfo?.id)
           .maybeSingle();
 
         if (fetchError) {
@@ -34,11 +34,9 @@ export default function SettingsInstansi({
               existingRecord.longitude || ""
             }`
           );
-          setInstance(existingRecord.instance_type || "");
         } else {
           setName(userInfo.full_name ?? "");
           setLatLong("");
-          setInstance("");
         }
       }
     } catch (e) {
@@ -54,8 +52,9 @@ export default function SettingsInstansi({
     setLoading(true);
 
     try {
-      const [latitude, longitude] =
-        latLong?.split(",")?.map((coord) => coord.trim()) || [];
+      const [latitude, longitude] = latLong
+        .split(",")
+        .map((coord) => coord.trim());
 
       if (!latitude || !longitude) {
         throw new Error("Invalid latitude or longitude");
@@ -64,7 +63,7 @@ export default function SettingsInstansi({
       const { data: existingRecord, error: fetchError } = await supabase
         .from("organizations")
         .select("*")
-        .eq("user_id", userInfo?.user_id)
+        .eq("user_id", userInfo?.id)
         .maybeSingle();
 
       if (fetchError) {
@@ -80,9 +79,8 @@ export default function SettingsInstansi({
             name,
             latitude,
             longitude,
-            instance_type: instance,
           })
-          .eq("user_id", userInfo?.user_id);
+          .eq("user_id", userInfo?.id);
 
         if (updateError) {
           throw new Error(`Update failed: ${updateError.message}`);
@@ -97,8 +95,7 @@ export default function SettingsInstansi({
               name,
               latitude,
               longitude,
-              user_id: userInfo?.user_id,
-              instance_type: instance,
+              user_id: userInfo?.id,
             },
           ]);
 
@@ -120,21 +117,23 @@ export default function SettingsInstansi({
     <div>
       <NavBar userInfo={userInfo} />
 
-      <div className="flex items-center justify-center text-xl font-bold mt-20">
-        Atur Lokasi Instansi Anda
-      </div>
-
       <div className="flex items-center justify-center mt-10">
         <form
-          className="flex flex-col w-full md:w-1/2 px-10 md:px-0 mt-10"
+          className="border p-10"
           method="post"
           onSubmit={(e) => {
             e.preventDefault();
             handleSubmit();
           }}
         >
+          <div className="flex items-center justify-center text-xl font-bold">
+            Atur Lokasi Instansi Anda
+          </div>
+
           <div className="mb-4 w-full">
-            <label className="mb-2.5 block font-medium">Name</label>
+            <label className="mb-2.5 block font-medium text-gray-700">
+              Name
+            </label>
             <div className="relative">
               <input
                 disabled={userInfo?.full_name !== null}
@@ -144,33 +143,14 @@ export default function SettingsInstansi({
                 placeholder="Enter your name"
                 className="w-full rounded-lg border border-gray-300 bg-gray-200 text-gray-500 py-4 pl-3 pr-10 outline-none cursor-not-allowed"
               />
-
-              <span className="absolute right-4 top-4">
+              <span className="absolute right-4 top-4 text-gray-500">
                 <PersonOutline />
               </span>
             </div>
           </div>
 
           <div className="mb-4 w-full">
-            <label className="mb-2.5 block font-medium">Pilih Instansi</label>
-            <div className="relative">
-              <select
-                className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-3 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none border-form-strokedark bg-form-input focus:border-primary"
-                value={instance}
-                onChange={(e) => setInstance(e.target.value)}
-              >
-                <option value="" disabled>
-                  Pilih salah satu instansi
-                </option>
-                <option value="ambulance">Ambulans / Rumah Sakit</option>
-                <option value="police">Polisi</option>
-                <option value="firefighter">Pemadam Kebakaran</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="mb-4 w-full">
-            <label className="mb-2.5 block font-medium">
+            <label className="mb-2.5 block font-medium text-gray-700">
               Latitude, Longitude (Contoh: -6.2238477,106.9694887)
             </label>
             <div className="relative">
@@ -179,10 +159,9 @@ export default function SettingsInstansi({
                 value={latLong}
                 onChange={(e) => setLatLong(e.target.value)}
                 placeholder="Enter your (latitude, longitude)"
-                className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-3 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none border-form-strokedark bg-form-input  focus:border-primary"
+                className="w-full rounded-lg border border-gray-300 bg-transparent py-4 pl-3 pr-10 text-black outline-none focus:border-primary"
               />
-
-              <span className="absolute right-4 top-4">
+              <span className="absolute right-4 top-4 text-gray-500">
                 <MapOutlined />
               </span>
             </div>
@@ -194,7 +173,7 @@ export default function SettingsInstansi({
                 !loading ? "bg-blue-900" : "bg-gray-300"
               } text-white p-4 transition hover:bg-opacity-90`}
             >
-              {loading ? "Loading..." : "Simpan "}
+              {loading ? "Loading..." : "Simpan"}
             </div>
           </button>
         </form>

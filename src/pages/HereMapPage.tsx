@@ -1,9 +1,9 @@
-import { User } from "../types/user";
+import { Users } from "../types/user";
 import MapComponent from "./HereMap";
-import { Marker } from "../models/marker";
+import { Marker } from "../types/marker";
 
 interface HereMapPageProps {
-  userInfo: User | null;
+  userInfo: Users | null;
   markers: Marker[];
 }
 

@@ -1,12 +1,11 @@
 import { useEffect, useRef } from "react";
-import { User } from "../types/user";
-import { Marker } from "../models/marker";
+import { Users } from "../types/user";
+import { Marker } from "../types/marker";
 import { fetchOrganizationByUserId } from "../models/organizations";
 
-// Extend the Window interface to include HERE Maps types
 declare global {
   interface Window {
-    H: any; // Consider specifying more accurate types if available
+    H: any;
   }
 }
 
@@ -15,7 +14,7 @@ export default function MapComponent({
   userInfo,
 }: {
   markers: Marker[] | null;
-  userInfo: User | null;
+  userInfo: Users | null;
 }) {
   const mapRef = useRef<HTMLDivElement>(null);
 
@@ -32,7 +31,7 @@ export default function MapComponent({
       }
 
       const { data: organization, error } = await fetchOrganizationByUserId(
-        userInfo.user_id!
+        userInfo.id!
       );
 
       if (error || !organization) {
@@ -123,17 +122,13 @@ export default function MapComponent({
     radius: number,
     options: { color?: string; strokeColor?: string; strokeWidth?: number } = {}
   ) => {
-    const circle = new window.H.map.Circle(
-      center, // Center of the circle
-      radius, // Radius in meters
-      {
-        style: {
-          fillColor: options.color || "rgba(255, 0, 0, 0.3)", // Default fill color (semi-transparent red)
-          strokeColor: options.strokeColor || "red", // Border color
-          lineWidth: options.strokeWidth || 2, // Border thickness
-        },
-      }
-    );
+    const circle = new window.H.map.Circle(center, radius, {
+      style: {
+        fillColor: options.color || "rgba(255, 0, 0, 0.3)",
+        strokeColor: options.strokeColor || "red",
+        lineWidth: options.strokeWidth || 2,
+      },
+    });
 
     mapInstance.addObject(circle);
     zoomAnimation(circle);
@@ -144,7 +139,7 @@ export default function MapComponent({
     const maxRadius = 50;
     const minRadius = 5;
     const step = 2;
-    const interval = 200; // 0.5 seconds
+    const interval = 200;
 
     const animate = () => {
       const currentRadius = circle.getRadius();
@@ -174,24 +169,22 @@ export default function MapComponent({
   ) => {
     const previousBox = document.querySelector(".info-box");
     if (previousBox) previousBox.remove();
-  
+
     const screenPosition = mapInstance.geoToScreen({
       lat: marker.latitude,
       lng: marker.longitude,
     });
-  
+
     const infoBox = document.createElement("div");
     infoBox.className = "info-box";
-  
-    // Create the close button
+
     const closeButton = document.createElement("button");
-    closeButton.innerHTML = "&times;"; // Unicode character for multiplication sign (×)
+    closeButton.innerHTML = "&times;";
     closeButton.className = "close-button";
     closeButton.onclick = () => {
       infoBox.remove();
     };
-  
-    // Use innerHTML to render HTML content
+
     infoBox.innerHTML = `${
       isCurrent
         ? "<span class='bg-red-500 text-xs w-full text-white px-2 py-1 rounded-full'>Posisi Anda Sekarang</span>\n\n"
@@ -200,17 +193,15 @@ export default function MapComponent({
       Latitude: ${marker.latitude}
       Longitude: ${marker.longitude}
     `;
-  
-    // Append the close button to the infoBox
+
     infoBox.appendChild(closeButton);
-  
+
     infoBox.style.position = "absolute";
     infoBox.style.left = `${screenPosition.x}px`;
     infoBox.style.top = `${screenPosition.y - 50}px`;
-  
+
     mapRef.current?.appendChild(infoBox);
   };
-  
 
   return (
     <div

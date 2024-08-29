@@ -5,18 +5,21 @@ import {
   MapOutlined,
   PersonOutline,
   Settings,
+  Menu as MenuIcon,
+  ArrowUpward,
 } from "@mui/icons-material";
 import { signOut } from "firebase/auth";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../utils/firebase";
 import { toast } from "react-toastify";
-import { User } from "../types/user";
+import { Users } from "../types/user";
 
-const NavBar = ({ userInfo }: { userInfo: User | null }) => {
+const NavBar = ({ userInfo }: { userInfo: Users | null }) => {
   const navigate = useNavigate();
 
   const [profileMenuClicked, setProfileMenuClicked] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -24,7 +27,7 @@ const NavBar = ({ userInfo }: { userInfo: User | null }) => {
       toast.success("Berhasil keluar.");
       navigate("/");
     } catch (error) {
-      toast.success(`Terjadi kesalahan ketika keluar. ${error}`);
+      toast.error(`Terjadi kesalahan ketika keluar. ${error}`);
     }
   };
 
@@ -43,6 +46,19 @@ const NavBar = ({ userInfo }: { userInfo: User | null }) => {
             />
             SIMA App
           </a>
+
+          {/* Hamburger Icon */}
+          <div className="lg:hidden">
+            <button
+              className="p-2 text-gray-600"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
+            >
+              <MenuIcon />
+            </button>
+          </div>
+
           <div className="hidden lg:block">
             <ul className="flex flex-col gap-2 my-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
               <li className="block p-1 font-sans text-sm antialiased font-medium leading-normal text-blue-gray-900">
@@ -76,7 +92,8 @@ const NavBar = ({ userInfo }: { userInfo: User | null }) => {
               </li>
             </ul>
           </div>
-          <div className="relative">
+
+          <div className="relative hidden lg:block">
             <button
               className="relative ml-auto h-8 w-8 rounded-full overflow-hidden border border-gray-300"
               type="button"
@@ -88,7 +105,7 @@ const NavBar = ({ userInfo }: { userInfo: User | null }) => {
               <PersonOutline />
             </button>
             <div
-              className={`absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none ${
+              className={`absolute right-0  mt-2 w-max max-w-64 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none ${
                 profileMenuClicked ? "" : "hidden"
               }`}
               role="menu"
@@ -121,6 +138,57 @@ const NavBar = ({ userInfo }: { userInfo: User | null }) => {
                   <Logout /> Keluar
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        <div
+          id="mobile-menu"
+          className={`lg:hidden ${mobileMenuOpen ? "block" : "hidden"}`}
+        >
+          <div className="flex flex-col mt-2 space-y-2">
+            <Link
+              to="/"
+              className="flex gap-4 items-center px-4 py-2 text-gray-700 hover:bg-gray-100"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Computer />
+              Beranda
+            </Link>
+            <Link
+              to="/report"
+              className="flex gap-4 items-center px-4 py-2 text-gray-700 hover:bg-gray-100"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Assignment />
+              Laporan
+            </Link>
+            <Link
+              to="/report_maps"
+              className="flex gap-4 items-center px-4 py-2 text-gray-700 hover:bg-gray-100"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <MapOutlined />
+              Maps Laporan
+            </Link>
+            <Link
+              to="/settings/instansi"
+              className="flex gap-4 items-center px-4 py-2 text-gray-700 hover:bg-gray-100"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Settings />
+              Atur Instansi
+            </Link>
+            <div
+              className="flex gap-4 items-center px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                handleLogout();
+              }}
+            >
+              <Logout />
+              Keluar
             </div>
           </div>
         </div>

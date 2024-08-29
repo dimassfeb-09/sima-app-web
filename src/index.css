@@ -49,16 +49,29 @@
   }
 }
 
-.custom-circle {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none; /* Prevent interaction */
+/* Global scrollbar styles for WebKit browsers */
+:root {
+  --scrollbar-width: 5px;
+  --scrollbar-track-bg: #f1f1f1;
+  --scrollbar-thumb-bg: #888;
+  --scrollbar-thumb-hover-bg: #555;
 }
 
-.zoom-in {
-  animation: zoomIn 0.5s forwards;
+::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width); /* For horizontal scrollbar */
 }
 
-.zoom-out {
-  animation: zoomOut 0.5s forwards;
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-bg);
 }

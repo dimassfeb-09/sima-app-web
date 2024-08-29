@@ -1,4 +1,3 @@
-// src/authModel.ts
 import {auth} from '../utils/firebase';
 import {
   signInWithEmailAndPassword,

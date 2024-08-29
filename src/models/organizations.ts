@@ -1,13 +1,6 @@
+import { Organization } from "../types/organization";
 import supabase from "../utils/supabase";
 
-interface Organization {
-  id?: number;
-  name: string;
-  latitude: number;
-  longitude: number;
-  user_id: string;
-  instance_type: string;
-}
 
 interface Result<T> {
   data: T | null;
@@ -146,3 +139,4 @@ export const incrementCountByType = async (type: string) => {
     console.error("Error incremnet count by type:", error);
   }
 };
+

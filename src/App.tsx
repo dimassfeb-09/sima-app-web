@@ -12,7 +12,6 @@ import RegisterPage from "./pages/RegisterPage";
 import SettingsInstansi from "./pages/SettingsInstansi";
 
 import ProtectedRoute from "./components/ProtectedRoute";
-import { Toast } from "./components/Toast";
 
 import { auth } from "./utils/firebase";
 import supabase from "./utils/supabase";
@@ -20,14 +19,15 @@ import supabase from "./utils/supabase";
 import { getUserInfo } from "./models/user";
 import { fetchOrganizationByUserId } from "./models/organizations";
 
-import { User } from "./types/user";
 import ReportPage from "./pages/ReportPage";
 import MapsReportPage from "./pages/MapsReportPage";
+import { Users } from "./types/user";
+import useNewReportListener from "./helpers/listeners _new_report";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [userInfo, setUserInfo] = useState<User | null>(null);
+  const [userInfo, setUserInfo] = useState<Users | null>(null);
   const [organizationId, setOrganizationId] = useState<number | null>(null);
 
   // Handle authentication state changes
@@ -54,9 +54,9 @@ function App() {
   // Fetch organization based on user info
   useEffect(() => {
     const fetchOrganization = async () => {
-      if (userInfo?.user_id) {
+      if (userInfo?.id) {
         try {
-          const response = await fetchOrganizationByUserId(userInfo.user_id);
+          const response = await fetchOrganizationByUserId(userInfo.id);
           if (response?.data) {
             setOrganizationId(response.data.id!);
           }
@@ -69,31 +69,11 @@ function App() {
     fetchOrganization();
   }, [userInfo]);
 
-  // Subscribe to new report notifications
-  const createNewReportSubscription = useCallback(() => {
-    if (organizationId === null) return;
+  useNewReportListener({
+    organizationId: organizationId!,
+    showingToast: true,
+  });
 
-    const channel = supabase.channel(`report-${organizationId}`);
-
-    channel
-      .on("broadcast", { event: "new-report" }, (payload) => {
-        const { report_id: reportId, title } = payload.payload;
-
-        toast.success(<Toast title={title} idReport={reportId} />);
-      })
-      .subscribe();
-
-    return channel;
-  }, [organizationId]);
-
-  useEffect(() => {
-    const channel = createNewReportSubscription();
-    return () => {
-      if (channel) {
-        channel.unsubscribe();
-      }
-    };
-  }, [createNewReportSubscription]);
 
   if (isLoading) {
     return <LoadingPage />;

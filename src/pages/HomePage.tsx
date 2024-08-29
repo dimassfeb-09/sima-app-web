@@ -4,11 +4,11 @@ import {
   LocalHospital,
   LocalFireDepartment,
 } from "@mui/icons-material";
-import { User } from "../types/user";
+import { Users } from "../types/user";
 import NavBar from "../components/NavBar";
 import { getCountByType } from "../models/organizations";
 
-export default function HomePage({ userInfo }: { userInfo: User | null }) {
+export default function HomePage({ userInfo }: { userInfo: Users | null }) {
   const [policeCount, setPoliceCount] = useState<string>("0");
   const [ambulanceCount, setAmbulanceCount] = useState<string>("0");
   const [firefighterCount, setFirefighterCount] = useState<string>("0");
@@ -27,7 +27,7 @@ export default function HomePage({ userInfo }: { userInfo: User | null }) {
       } catch (error) {
         console.error("Error fetching counts:", error);
       } finally {
-        setIsLoading(false); // Set loading to false after data fetching is done
+        setIsLoading(false);
       }
     };
 
