@@ -6,19 +6,66 @@ import {
   PersonOutline,
   Settings,
   Menu as MenuIcon,
+  VolumeUp,
 } from "@mui/icons-material";
 import { signOut } from "firebase/auth";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../utils/firebase";
 import { toast } from "react-toastify";
 import { Users } from "../types/user";
+import { fetchOrganizationByUserId } from "../models/organizations";
+import useNewReportListener from "../helpers/listeners _new_report";
+import { Organization } from "../types/organization";
 
 const NavBar = ({ userInfo }: { userInfo: Users | null }) => {
   const navigate = useNavigate();
 
-  const [profileMenuClicked, setProfileMenuClicked] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileMenuClicked, setProfileMenuClicked] = useState<boolean>(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
+  const [isNotificationActive, setIsNotificationActive] =
+    useState<boolean>(true);
+  const [organization, setOrganization] = useState<Organization>();
+
+  useEffect(() => {
+    const notificationSetting = localStorage.getItem(
+      "is_active_sound_notification"
+    );
+    setIsNotificationActive(notificationSetting === "true");
+  }, []);
+
+  useEffect(() => {
+    const fetchOrganization = async () => {
+      if (userInfo?.id) {
+        try {
+          const response = await fetchOrganizationByUserId(userInfo.id);
+          if (response?.data) {
+            setOrganization(response.data);
+          }
+        } catch (error) {
+          console.error("Failed to fetch organization", error);
+        }
+      }
+    };
+
+    fetchOrganization();
+  }, [userInfo]);
+
+  useNewReportListener({
+    organizationId: organization?.id!,
+    onNewReport: () => {
+      toast.success("Terdapat laporan baru");
+
+      if (isNotificationActive) {
+        const audio = new Audio(
+          `/assets/sound/${organization?.instance_type}.mp3`
+        );
+        audio.play().catch((error) => {
+          console.error("Error playing sound", error);
+        });
+      }
+    },
+  });
 
   const handleLogout = async () => {
     try {
@@ -30,12 +77,18 @@ const NavBar = ({ userInfo }: { userInfo: Users | null }) => {
     }
   };
 
+  const toggleNotification = () => {
+    const value = !isNotificationActive;
+    setIsNotificationActive(value);
+    localStorage.setItem("is_active_sound_notification", value.toString());
+  };
+
   return (
     <>
       <nav className="fixed z-50 block w-full px-6 py-3 mx-auto bg-white border shadow-md border-white/80 bg-opacity-80 backdrop-blur-2xl backdrop-saturate-200">
         <div className="flex items-center justify-between text-blue-gray-900">
-          <a
-            href="#"
+          <Link
+            to="/"
             className="flex gap-2 justify-center items-center mr-4 cursor-pointer py-1.5 font-sans text-base font-semibold leading-relaxed tracking-normal text-inherit antialiased"
           >
             <img
@@ -44,7 +97,7 @@ const NavBar = ({ userInfo }: { userInfo: Users | null }) => {
               alt="Logo"
             />
             SIMA App
-          </a>
+          </Link>
 
           {/* Hamburger Icon */}
           <div className="lg:hidden">
@@ -128,6 +181,40 @@ const NavBar = ({ userInfo }: { userInfo: Users | null }) => {
                 >
                   <Settings /> Atur Instansi
                 </Link>
+
+                <div
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                >
+                  <div className="flex justify-between">
+                    <div>
+                      <VolumeUp /> Sound Notification
+                    </div>
+                    <div className="flex items-center">
+                      <label className="inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
+                          checked={isNotificationActive}
+                          onChange={toggleNotification}
+                        />
+                        <div
+                          className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${
+                            isNotificationActive ? "bg-green-500" : "bg-red-500"
+                          } peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300`}
+                        >
+                          <div
+                            className={`absolute top-[2px] left-[2px] w-5 h-5 bg-white rounded-full transition-transform duration-200 ${
+                              isNotificationActive
+                                ? "transform translate-x-full"
+                                : ""
+                            }`}
+                          ></div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
 
                 <div
                   onClick={handleLogout}

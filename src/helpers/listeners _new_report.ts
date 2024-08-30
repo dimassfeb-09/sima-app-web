@@ -1,18 +1,12 @@
 import { useCallback, useEffect } from "react";
-import { toast } from "react-toastify";
 import supabase from "../utils/supabase";
 
 interface UseNewReportListenerProps {
   organizationId: number;
-  fetchReports?: () => void;
-  showingToast?: boolean;
+  onNewReport?: () => void;
 }
 
-const useNewReportListener = ({
-  organizationId,
-  fetchReports,
-  showingToast = false,
-}: UseNewReportListenerProps) => {
+const useNewReportListener = ({organizationId, onNewReport}: UseNewReportListenerProps) => {
   const createNewReportSubscription = useCallback(() => {
     if (organizationId === null) return;
 
@@ -20,17 +14,14 @@ const useNewReportListener = ({
 
     channel
       .on("broadcast", { event: "new-report" }, (_) => {
-        if (showingToast) {
-          toast.success("Terdapat laporan baru");
-        }
-        if (fetchReports) {
-          fetchReports();
+        if (onNewReport) {
+          onNewReport();
         }
       })
       .subscribe();
 
     return channel;
-  }, [organizationId, fetchReports, showingToast]);
+  }, [organizationId, onNewReport]);
 
   useEffect(() => {
     const channel = createNewReportSubscription();

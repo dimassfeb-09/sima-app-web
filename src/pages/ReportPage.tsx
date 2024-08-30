@@ -7,6 +7,7 @@ import Badge from "../components/Badge";
 import ReportDetailModal from "../components/ReportDetailModal";
 import { Assignment } from "../types/assignment";
 import useNewReportListener from "../helpers/listeners _new_report";
+import { toast } from "react-toastify";
 
 export default function ReportPage({ userInfo }: { userInfo: Users | null }) {
   const [reports, setReports] = useState<Assignment[]>([]);
@@ -59,8 +60,10 @@ export default function ReportPage({ userInfo }: { userInfo: Users | null }) {
 
   useNewReportListener({
     organizationId: organizationId!,
-    fetchReports: fetchReports,
-    showingToast: true,
+    onNewReport: () => {
+      fetchReports();
+      toast.success("Ada laporan baru");
+    },
   });
 
   const handleRowClick = (assignment: Assignment) => {

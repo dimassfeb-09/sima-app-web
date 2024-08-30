@@ -16,18 +16,15 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { auth } from "./utils/firebase";
 
 import { getUserInfo } from "./models/user";
-import { fetchOrganizationByUserId } from "./models/organizations";
 
 import ReportPage from "./pages/ReportPage";
 import MapsReportPage from "./pages/MapsReportPage";
 import { Users } from "./types/user";
-import useNewReportListener from "./helpers/listeners _new_report";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userInfo, setUserInfo] = useState<Users | null>(null);
-  const [organizationId, setOrganizationId] = useState<number | null>(null);
 
   // Handle authentication state changes
   useEffect(() => {
@@ -49,29 +46,6 @@ function App() {
 
     return () => unsubscribe();
   }, []);
-
-  // Fetch organization based on user info
-  useEffect(() => {
-    const fetchOrganization = async () => {
-      if (userInfo?.id) {
-        try {
-          const response = await fetchOrganizationByUserId(userInfo.id);
-          if (response?.data) {
-            setOrganizationId(response.data.id!);
-          }
-        } catch (error) {
-          console.error("Failed to fetch organization", error);
-        }
-      }
-    };
-
-    fetchOrganization();
-  }, [userInfo]);
-
-  useNewReportListener({
-    organizationId: organizationId!,
-    showingToast: true,
-  });
 
   if (isLoading) {
     return <LoadingPage />;
