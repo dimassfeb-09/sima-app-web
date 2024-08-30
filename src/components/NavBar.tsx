@@ -7,6 +7,7 @@ import {
   Settings,
   Menu as MenuIcon,
   VolumeUp,
+  VolumeMute,
 } from "@mui/icons-material";
 import { signOut } from "firebase/auth";
 import { useEffect, useState } from "react";
@@ -187,8 +188,9 @@ const NavBar = ({ userInfo }: { userInfo: Users | null }) => {
                   role="menuitem"
                 >
                   <div className="flex justify-between">
-                    <div>
-                      <VolumeUp /> Sound Notification
+                    <div className="flex gap-1">
+                      {isNotificationActive ? <VolumeUp /> : <VolumeMute />}
+                      Suara Notifikasi
                     </div>
                     <div className="flex items-center">
                       <label className="inline-flex items-center cursor-pointer">
@@ -266,6 +268,31 @@ const NavBar = ({ userInfo }: { userInfo: Users | null }) => {
               <Settings />
               Atur Instansi
             </Link>
+
+            <div className="flex gap-4 items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
+              {isNotificationActive ? <VolumeUp /> : <VolumeMute />}
+              Suara Notifikasi
+              <label className="inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={isNotificationActive}
+                  onChange={toggleNotification}
+                />
+                <div
+                  className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${
+                    isNotificationActive ? "bg-green-500" : "bg-red-500"
+                  } peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300`}
+                >
+                  <div
+                    className={`absolute top-[2px] left-[2px] w-5 h-5 bg-white rounded-full transition-transform duration-200 ${
+                      isNotificationActive ? "transform translate-x-full" : ""
+                    }`}
+                  ></div>
+                </div>
+              </label>
+            </div>
+
             <div
               className="flex gap-4 items-center px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
               onClick={() => {
