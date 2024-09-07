@@ -6,6 +6,7 @@ export async function fetchReportById(reportId: number): Promise<Assignment | nu
   const { data, error } = await supabase
     .from('report_assignments')
     .select(`
+      id,
       assigned_at,
       assignment_status:status,
       assignment_distance:distance,
@@ -41,6 +42,7 @@ export async function fetchReportById(reportId: number): Promise<Assignment | nu
 
   if (data) {
     const assignment: Assignment = {
+      id: data.id,
       assigned_at: data.assigned_at,
       status: data.assignment_status,
       distance: data.assignment_distance,
@@ -58,6 +60,7 @@ export async function fetchReportsByOrganizationId(organizationId: number): Prom
   const { data, error } = await supabase
     .from('report_assignments')
     .select(`
+      id,
       assigned_at,
       status,
       distance,
@@ -91,6 +94,7 @@ export async function fetchReportsByOrganizationId(organizationId: number): Prom
   if (!data) return null;
 
   const assignments: Assignment[] = data.map((item: any) => ({
+    id: item.id,
     assigned_at: item.assigned_at,
     status: item.status,
     distance: item.distance,
@@ -99,4 +103,44 @@ export async function fetchReportsByOrganizationId(organizationId: number): Prom
   }));
 
   return assignments;
+}
+
+
+
+export async function updateReportStatus(reportId: number, newStatus: string): Promise<boolean> {
+  const { data: assignmentData, error: assignmentError } = await supabase
+    .from('report_assignments')
+    .select('report_id')
+    .eq('id', reportId)
+    .single();
+
+  if (assignmentError || !assignmentData) {
+    console.error("Error fetching report_id from report_assignments:", assignmentError?.message || "No data found");
+    return false;
+  }
+
+  const { report_id } = assignmentData;
+
+  const { data: assignmentsData, error: assignmentsError } = await supabase
+    .from('report_assignments')
+    .update({ status: newStatus })
+    .eq('id', reportId);
+
+  if (assignmentsError) {
+    console.error("Error updating report_assignments status:", assignmentsError.message);
+    return false;
+  }
+
+  const { data: reportsData, error: reportsError } = await supabase
+    .from('reports')
+    .update({ status: newStatus })
+    .eq('id', report_id);
+
+  if (reportsError) {
+    console.error("Error updating reports status:", reportsError.message);
+    return false;
+  }
+
+  const success = (assignmentsData && reportsData) ? true : false;
+  return success;
 }

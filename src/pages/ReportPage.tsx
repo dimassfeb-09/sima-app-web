@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
 import NavBar from "../components/NavBar";
 import { Users } from "../types/user";
-import { fetchReportsByOrganizationId } from "../models/report";
+import {
+  fetchReportsByOrganizationId,
+  updateReportStatus,
+} from "../models/report";
 import { fetchOrganizationByUserId } from "../models/organizations";
 import Badge from "../components/Badge";
 import ReportDetailModal from "../components/ReportDetailModal";
 import { Assignment } from "../types/assignment";
 import useNewReportListener from "../helpers/listeners _new_report";
 import { toast } from "react-toastify";
+import ConfirmationDialog from "../components/ConfirmDialog";
 
 export default function ReportPage({ userInfo }: { userInfo: Users | null }) {
   const [reports, setReports] = useState<Assignment[]>([]);
@@ -16,6 +20,9 @@ export default function ReportPage({ userInfo }: { userInfo: Users | null }) {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [organizationId, setOrganizationId] = useState<number | null>(null);
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [currentReportId, setCurrentReportId] = useState<number | null>(null);
+  const [newStatus, setNewStatus] = useState<string>("");
 
   const fetchReports = async () => {
     if (!organizationId) return;
@@ -71,6 +78,37 @@ export default function ReportPage({ userInfo }: { userInfo: Users | null }) {
     setIsModalOpen(true);
   };
 
+  const handleStatusChange = (reportId: number, newStatus: string) => {
+    setCurrentReportId(reportId);
+    setNewStatus(newStatus);
+    setDialogOpen(true);
+  };
+
+  const confirmStatusChange = async () => {
+    if (currentReportId !== null && newStatus) {
+      try {
+        await updateReportStatus(currentReportId, newStatus);
+        setReports((prevReports) =>
+          prevReports.map((report) =>
+            report.id === currentReportId
+              ? { ...report, status: newStatus }
+              : report
+          )
+        );
+        toast.success(`Status updated to ${newStatus}`);
+      } catch (error) {
+        console.error("Failed to update status", error);
+        toast.error("Failed to update status");
+      } finally {
+        setDialogOpen(false);
+      }
+    }
+  };
+
+  const cancelStatusChange = () => {
+    setDialogOpen(false);
+  };
+
   return (
     <div className="h-screen">
       <NavBar userInfo={userInfo} />
@@ -79,6 +117,15 @@ export default function ReportPage({ userInfo }: { userInfo: Users | null }) {
         <ReportDetailModal
           assignment={selectedAssignment}
           setIsModalOpen={setIsModalOpen}
+        />
+      )}
+
+      {dialogOpen && (
+        <ConfirmationDialog
+          isOpen={dialogOpen}
+          message={`Are you sure you want to set the status to ${newStatus}?`}
+          onConfirm={confirmStatusChange}
+          onCancel={cancelStatusChange}
         />
       )}
 
@@ -102,13 +149,16 @@ export default function ReportPage({ userInfo }: { userInfo: Users | null }) {
                 <th className="px-6 py-3 border-r border-b border-gray-300">
                   Jarak
                 </th>
+                <th className="px-6 py-3 border-r border-b border-gray-300">
+                  Ubah Status
+                </th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="px-6 py-4 text-center border-t border-gray-200"
                   >
                     Loading...
@@ -121,6 +171,7 @@ export default function ReportPage({ userInfo }: { userInfo: Users | null }) {
                     status,
                     distance,
                     assigned_at,
+                    id,
                   } = item;
                   return (
                     <tr
@@ -143,13 +194,51 @@ export default function ReportPage({ userInfo }: { userInfo: Users | null }) {
                       <td className="px-6 py-4 border-r border-b">
                         {distance.toFixed(2)} km
                       </td>
+                      <td className="px-6 py-4 border-r border-b border-gray-200">
+                        <button
+                          className="bg-orange-500 text-white px-2 py-1 rounded mr-2"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent row click
+                            handleStatusChange(id, "pending");
+                          }}
+                        >
+                          Pending
+                        </button>
+                        <button
+                          className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent row click
+                            handleStatusChange(id, "process");
+                          }}
+                        >
+                          Process
+                        </button>
+                        <button
+                          className="bg-green-500 text-white px-2 py-1 rounded mr-2"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent row click
+                            handleStatusChange(id, "success");
+                          }}
+                        >
+                          Success
+                        </button>
+                        <button
+                          className="bg-red-500 text-white px-2 py-1 rounded"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent row click
+                            handleStatusChange(id, "error");
+                          }}
+                        >
+                          Error
+                        </button>
+                      </td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="px-6 py-4 text-center border-t border-gray-200"
                   >
                     No reports available

@@ -17,6 +17,7 @@ export default function MapComponent({
   userInfo: Users | null;
 }) {
   const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
 
   useEffect(() => {
     const initializeMap = async () => {
@@ -50,13 +51,15 @@ export default function MapComponent({
           mapRef.current,
           defaultLayers.vector.normal.map,
           {
-            zoom: 15,
+            zoom: 16,
             center: {
               lat: organization.latitude,
               lng: organization.longitude,
             },
           }
         );
+
+        mapInstanceRef.current = mapInstance; // Store the map instance
 
         const marker = {
           name: organization.name,
@@ -111,7 +114,8 @@ export default function MapComponent({
       addCircleToMap(
         mapInstance,
         { lat: marker.latitude, lng: marker.longitude },
-        20
+        15,
+        marker // Pass marker to use in info box
       );
     });
   };
@@ -120,17 +124,24 @@ export default function MapComponent({
     mapInstance: any,
     center: { lat: number; lng: number },
     radius: number,
-    options: { color?: string; strokeColor?: string; strokeWidth?: number } = {}
+    marker: Marker
   ) => {
     const circle = new window.H.map.Circle(center, radius, {
       style: {
-        fillColor: options.color || "rgba(255, 0, 0, 0.3)",
-        strokeColor: options.strokeColor || "red",
-        lineWidth: options.strokeWidth || 2,
+        fillColor: "rgba(255, 0, 0, 0.3)",
+        strokeColor: "red",
+        lineWidth: 2,
       },
     });
 
     mapInstance.addObject(circle);
+
+    // Add click event to circle
+    circle.addEventListener("tap", () => {
+      console.log("Circle tapped");
+      displayInfoBox(mapInstance, false, marker);
+    });
+
     zoomAnimation(circle);
   };
 
@@ -178,29 +189,66 @@ export default function MapComponent({
     const infoBox = document.createElement("div");
     infoBox.className = "info-box";
 
+    // Style the infoBox
+    infoBox.style.position = "absolute";
+    infoBox.style.left = `${screenPosition.x}px`;
+    infoBox.style.top = `${screenPosition.y - 50}px`;
+    infoBox.style.backgroundColor = "white";
+    infoBox.style.border = "1px solid #ddd";
+    infoBox.style.borderRadius = "5px";
+    infoBox.style.padding = "10px";
+    infoBox.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.2)";
+    infoBox.style.maxWidth = "200px";
+    infoBox.style.zIndex = "10";
+
     const closeButton = document.createElement("button");
     closeButton.innerHTML = "&times;";
     closeButton.className = "close-button";
+    closeButton.style.position = "absolute";
+    closeButton.style.top = "5px";
+    closeButton.style.right = "5px";
+    closeButton.style.backgroundColor = "#f8f8f8";
+    closeButton.style.border = "none";
+    closeButton.style.cursor = "pointer";
     closeButton.onclick = () => {
       infoBox.remove();
     };
 
+    const statusStyle = getStatusStyle(marker.status ?? "error");
+
     infoBox.innerHTML = `${
       isCurrent
-        ? "<span class='bg-red-500 text-xs w-full text-white px-2 py-1 rounded-full'>Posisi Anda Sekarang</span>\n\n"
+        ? "<span class='bg-red-500 text-xs w-full text-white px-2 py-1 rounded-full'>Posisi Anda Sekarang</span><br><br>"
         : ""
-    }Name: ${marker.name}
+    }${
+      marker.status
+        ? `Status: <span class="${statusStyle} text-xs w-full text-white px-2 py-1 rounded-full">${marker.status}</span>
+          `
+        : ""
+    }Title: ${marker.name}
       Latitude: ${marker.latitude}
       Longitude: ${marker.longitude}
     `;
 
     infoBox.appendChild(closeButton);
 
-    infoBox.style.position = "absolute";
-    infoBox.style.left = `${screenPosition.x}px`;
-    infoBox.style.top = `${screenPosition.y - 50}px`;
-
     mapRef.current?.appendChild(infoBox);
+  };
+
+  // Helper function to get status style
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "bg-orange-500";
+      case "process":
+        return "bg-blue-500";
+      case "success":
+        return "bg-green-500";
+      case "error":
+        return "bg-red-500";
+      default:
+        return "bg-grey-500";
+    }
   };
 
   return (

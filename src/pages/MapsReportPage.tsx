@@ -4,20 +4,18 @@ import { fetchOrganizationByUserId } from "../models/organizations";
 import { fetchReportsByOrganizationId } from "../models/report";
 import { Users } from "../types/user";
 import { Marker } from "../types/marker";
-import HereMapPage from "./HereMapPage";
+import MapComponent from "./HereMap";
 
 export default function MapsReportPage({
   userInfo,
 }: {
   userInfo: Users | null;
 }) {
-  const [reports, setReports] = useState<Marker[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [markers, setMarkers] = useState<Marker[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       if (userInfo?.id) {
-        setLoading(true);
         try {
           const orgResponse = await fetchOrganizationByUserId(userInfo.id);
           if (orgResponse?.data) {
@@ -27,21 +25,18 @@ export default function MapsReportPage({
             );
 
             if (reportsResponse) {
-              console.log(reportsResponse);
-
               const markers: Marker[] = reportsResponse.map((item: any) => ({
                 user_id: item.reports.user_id,
                 name: item.reports.title,
+                status: item.reports.status,
                 latitude: item.reports.latitude,
                 longitude: item.reports.longitude,
               }));
-              setReports(markers);
+              setMarkers(markers);
             }
           }
         } catch (error) {
           console.error("Failed to fetch data", error);
-        } finally {
-          setLoading(false);
         }
       }
     };
@@ -52,15 +47,9 @@ export default function MapsReportPage({
   return (
     <>
       <NavBar userInfo={userInfo} />
-      {loading ? (
-        <div className="flex justify-center items-center h-screen w-screen absolute top-0 left-0 bg-white">
-          <p>Loading...</p>
-        </div>
-      ) : (
-        <div className="absolute flex justify-center items-center">
-          <HereMapPage markers={reports} userInfo={userInfo} />
-        </div>
-      )}
+      <div className="flex-1 h-full w-full bg-teal-500">
+        <MapComponent markers={markers} userInfo={userInfo} />
+      </div>
     </>
   );
 }
