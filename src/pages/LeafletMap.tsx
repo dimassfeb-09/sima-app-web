@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
-import L from "leaflet"; // Import Leaflet for custom marker icons
+import L from "leaflet";
 import { Marker } from "../types/marker";
 import { Users } from "../types/user";
 import { fetchOrganizationByUserId } from "../models/organizations";
@@ -61,7 +61,7 @@ export default function LeafletMapComponent({
       }).addTo(mapRef.current);
 
       const customIcon = L.icon({
-        iconUrl: "public/assets/map/marker.png",
+        iconUrl: "assets/map/marker.png",
         iconSize: [25, 41],
         iconAnchor: [12, 41],
         popupAnchor: [1, -34],
