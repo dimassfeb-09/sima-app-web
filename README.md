@@ -1,6 +1,4 @@
-# Tutorial Instalasi: Proyek ReactJS dengan Bun dan TypeScript untuk Redmine
-
-Selamat datang di proyek ReactJS menggunakan Bun dan TypeScript untuk Redmine. Ikuti langkah-langkah di bawah ini untuk menginstal dan menjalankan proyek ini.
+# Tutorial Instalasi: Proyek ReactJS dengan Bun dan TypeScript untuk SIMA APP Web Instansi
 
 ## 1. Instal Bun dan NodeJS
 
