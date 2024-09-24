@@ -47,7 +47,7 @@ export default function MapsReportPage({
   return (
     <>
       <NavBar userInfo={userInfo} />
-      <div className="flex-1 h-full w-full bg-teal-500">
+      <div className="flex-1 h-full w-full">
         <MapComponent markers={markers} userInfo={userInfo} />
       </div>
     </>
