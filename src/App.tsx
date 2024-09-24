@@ -20,7 +20,6 @@ import { getUserInfo } from "./models/user";
 import ReportPage from "./pages/ReportPage";
 import MapsReportPage from "./pages/MapsReportPage";
 import { Users } from "./types/user";
-import TestLeaflet from "./pages/TestLeaflet";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -63,7 +62,10 @@ function App() {
             path="/report_maps"
             element={<MapsReportPage userInfo={userInfo} />}
           />
-          <Route path="/maps" element={<TestLeaflet />} />
+          <Route
+            path="/maps"
+            element={<MapsReportPage userInfo={userInfo} />}
+          />
           <Route
             path="/settings/instansi"
             element={<SettingsInstansi userInfo={userInfo} />}

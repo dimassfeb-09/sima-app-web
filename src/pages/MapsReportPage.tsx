@@ -4,7 +4,7 @@ import { fetchOrganizationByUserId } from "../models/organizations";
 import { fetchReportsByOrganizationId } from "../models/report";
 import { Users } from "../types/user";
 import { Marker } from "../types/marker";
-import MapComponent from "./LeafletMap";
+import LeafletMapComponent from "./LeafletMap";
 
 export default function MapsReportPage({
   userInfo,
@@ -48,7 +48,7 @@ export default function MapsReportPage({
     <>
       <NavBar userInfo={userInfo} />
       <div className="flex-1 h-full w-full">
-        <MapComponent markers={markers} userInfo={userInfo} />
+        <LeafletMapComponent markers={markers} userInfo={userInfo} />
       </div>
     </>
   );
