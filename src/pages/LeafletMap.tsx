@@ -60,13 +60,21 @@ export default function LeafletMapComponent({
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(mapRef.current);
 
+      const customIcon = L.icon({
+        iconUrl: "public/assets/map/marker.png",
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+      });
+
       if (
         organization?.latitude !== undefined &&
         organization?.longitude !== undefined
       ) {
-        L.marker([organization.latitude, organization.longitude]).addTo(
-          mapRef.current
-        ).bindPopup(`
+        L.marker([organization.latitude, organization.longitude], {
+          icon: customIcon,
+        }).addTo(mapRef.current).bindPopup(`
             <div>
               <strong>${organization.name}</strong><br />
               Latitude: ${organization.latitude}<br />
