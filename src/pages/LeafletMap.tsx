@@ -296,22 +296,18 @@ export default function LeafletMapComponent({
   };
 
   return (
-    <div className="flex">
+    <div className="flex flex-col md:flex-row h-screen">
       <div
         id="map"
-        className="mt-2 z-0"
+        className="mt-2 z-0 w-full h-[60vh] md:h-full" // 60% height on mobile, 100% on desktop
         style={{
-          width: "80%",
-          height: "92vh", // Set the map to occupy 80% of the viewport height
+          maxHeight: "100vh", // Ensure it doesn't exceed viewport height
         }}
       />
       <div
-        className="flex flex-col gap-4 p-4"
+        className="flex flex-col gap-4 p-4 w-full md:w-[50%] lg:w-[30%] h-[40vh] md:h-full overflow-y-auto overflow-x-hidden"
         style={{
-          width: "20%",
-          height: "92vh", // Set the card container to occupy 20% of the viewport height
-          overflowY: "auto", // Allow vertical scrolling
-          overflowX: "hidden", // Prevent horizontal overflow
+          maxHeight: "90vh", // Max height for larger screens
         }}
       >
         {markers
