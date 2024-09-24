@@ -206,7 +206,7 @@ export default function LeafletMapComponent({
   }, [currentCoordinate, zoomCoordinate]); // Depend on both currentCoordinate and zoomCoordinate
 
   const fetchRoute = async (start: L.LatLngTuple, end: L.LatLngTuple) => {
-    const url = `http://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full`;
+    const url = `https://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full`;
 
     try {
       const response = await axios.get(url);
