@@ -31,6 +31,7 @@ export default function MapsReportPage({
                 status: item.reports.status,
                 latitude: item.reports.latitude,
                 longitude: item.reports.longitude,
+                address: item.reports.address,
               }));
               setMarkers(markers);
             }

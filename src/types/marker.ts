@@ -4,4 +4,5 @@ export interface Marker {
     status?: string;
     latitude: number;
     longitude: number;
+    address: string;
   }
