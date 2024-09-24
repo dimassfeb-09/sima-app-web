@@ -1,5 +1,3 @@
-Berikut adalah struktur file README yang telah diperbarui untuk mencakup instruksi untuk mengunduh proyek menggunakan `git clone` atau mengunduh file ZIP:
-
 # Tutorial Instalasi: Proyek ReactJS dengan Bun dan TypeScript untuk Redmine
 
 Selamat datang di proyek ReactJS menggunakan Bun dan TypeScript untuk Redmine. Ikuti langkah-langkah di bawah ini untuk menginstal dan menjalankan proyek ini.
