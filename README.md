@@ -1,50 +1,92 @@
-# React + TypeScript + Vite
+Berikut adalah struktur file README yang telah diperbarui untuk mencakup instruksi untuk mengunduh proyek menggunakan `git clone` atau mengunduh file ZIP:
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Tutorial Instalasi: Proyek ReactJS dengan Bun dan TypeScript untuk Redmine
 
-Currently, two official plugins are available:
+Selamat datang di proyek ReactJS menggunakan Bun dan TypeScript untuk Redmine. Ikuti langkah-langkah di bawah ini untuk menginstal dan menjalankan proyek ini.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 1. Instal Bun dan NodeJS
 
-## Expanding the ESLint configuration
+Pastikan Anda sudah menginstal Bun dan NodeJS. Jika belum, Anda dapat menginstalnya dengan perintah berikut melalui terminal atau command prompt:
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+### Bun
 
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```bash
+curl -fsSL https://bun.sh/install | bash
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### NodeJS
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+Kunjungi [NodeJS](https://nodejs.org/en) untuk mengunduh dan menginstal.
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+## 2. Unduh Proyek
+
+Anda dapat mengunduh proyek dengan dua cara:
+
+### Menggunakan Git
+
+Jika Anda memiliki Git terinstal, jalankan perintah berikut untuk meng-clone repository:
+
+```bash
+git clone git@github.com:dimassfeb-09/sima-app-web.git
 ```
+
+### Mengunduh File ZIP
+
+Jika Anda lebih memilih, Anda juga dapat mengunduh proyek sebagai file ZIP. Kunjungi halaman repository dan klik tombol "Code", kemudian pilih "Download ZIP".
+
+## 3. Ekstrak File Proyek
+
+Jika Anda mengunduh file ZIP, ekstrak file `sima-app-web-main.zip` ke folder yang Anda inginkan.
+
+## 4. Masuk ke dalam Folder Proyek
+
+Masuk ke dalam folder hasil ekstrak:
+
+```bash
+cd sima-app-web
+```
+
+## 5. Buka Terminal
+
+Buka terminal di dalam folder proyek yang telah Anda masuki.
+
+## 6. Struktur Folder Proyek
+
+Struktur folder proyek Anda seharusnya terlihat seperti ini:
+
+```
+sima-app-instansi/
+├── src/
+│   ├── utils/
+│   ├── App.tsx
+│   └── index.css
+│   └── main.tsx
+│   └── vite-env.d.ts
+├── tsconfig.json
+└── package.json
+```
+
+## 7. Instal Dependency
+
+Jalankan perintah berikut untuk menginstal semua dependency yang diperlukan:
+
+```bash
+bun install
+```
+
+## 8. Menjalankan Proyek
+
+Untuk menjalankan proyek, gunakan perintah berikut:
+
+```bash
+bun dev
+```
+
+Aplikasi Anda akan berjalan di [http://localhost:5173](http://localhost:5173).
+
+## Catatan
+
+- Pastikan Bun dan NodeJS terinstal dengan benar agar proyek dapat berjalan tanpa masalah.
+- Jika Anda mengalami masalah, periksa kembali langkah-langkah instalasi atau buka dokumentasi resmi Bun dan NodeJS.
+
+Selamat mencoba dan semoga berhasil!
