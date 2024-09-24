@@ -4,7 +4,7 @@ import { fetchOrganizationByUserId } from "../models/organizations";
 import { fetchReportsByOrganizationId } from "../models/report";
 import { Users } from "../types/user";
 import { Marker } from "../types/marker";
-import MapComponent from "./HereMap";
+import MapComponent from "./LeafletMap";
 
 export default function MapsReportPage({
   userInfo,
