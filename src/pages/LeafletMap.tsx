@@ -304,6 +304,7 @@ export default function LeafletMapComponent({
           maxHeight: "100vh", // Ensure it doesn't exceed viewport height
         }}
       />
+      {/*/
       <div
         className="flex flex-col gap-4 p-4 w-full md:w-[50%] lg:w-[30%] h-[40vh] md:h-full overflow-y-auto overflow-x-hidden"
         style={{
@@ -334,6 +335,7 @@ export default function LeafletMapComponent({
             </div>
           ))}
       </div>
+       */}
     </div>
   );
 }
