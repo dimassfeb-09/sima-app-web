@@ -264,36 +264,36 @@ export default function LeafletMapComponent({
     return coordinates;
   };
 
-  const handleCardClick = async (mark: Marker) => {
-    setCurrentCoordinate([mark.latitude, mark.longitude]);
-    setZoomCoordinate(16.5); // Adjust zoom level as desired when card is clicked
+  // const handleCardClick = async (mark: Marker) => {
+  //   setCurrentCoordinate([mark.latitude, mark.longitude]);
+  //   setZoomCoordinate(16.5); // Adjust zoom level as desired when card is clicked
 
-    // Draw line from organization to the clicked marker
-    if (organization) {
-      const organizationCoords: L.LatLngTuple = [
-        organization.latitude,
-        organization.longitude,
-      ];
-      const markerCoords: L.LatLngTuple = [mark.latitude, mark.longitude];
+  //   // Draw line from organization to the clicked marker
+  //   if (organization) {
+  //     const organizationCoords: L.LatLngTuple = [
+  //       organization.latitude,
+  //       organization.longitude,
+  //     ];
+  //     const markerCoords: L.LatLngTuple = [mark.latitude, mark.longitude];
 
-      const routeCoordinates = await fetchRoute(
-        organizationCoords,
-        markerCoords
-      );
+  //     const routeCoordinates = await fetchRoute(
+  //       organizationCoords,
+  //       markerCoords
+  //     );
 
-      if (polylineRef.current) {
-        mapRef.current.removeLayer(polylineRef.current); // Remove existing polyline if it exists
-      }
+  //     if (polylineRef.current) {
+  //       mapRef.current.removeLayer(polylineRef.current); // Remove existing polyline if it exists
+  //     }
 
-      if (routeCoordinates) {
-        polylineRef.current = L.polyline(routeCoordinates, {
-          color: "blue",
-          weight: 4,
-          opacity: 0.7,
-        }).addTo(mapRef.current); // Add the new polyline to the map
-      }
-    }
-  };
+  //     if (routeCoordinates) {
+  //       polylineRef.current = L.polyline(routeCoordinates, {
+  //         color: "blue",
+  //         weight: 4,
+  //         opacity: 0.7,
+  //       }).addTo(mapRef.current); // Add the new polyline to the map
+  //     }
+  //   }
+  // };
 
   return (
     <div className="flex flex-col md:flex-row h-screen">
