@@ -1,4 +1,4 @@
-import { Close } from "@mui/icons-material";
+import { Close, Phone } from "@mui/icons-material";
 import { Assignment } from "../types/assignment";
 import Badge from "./Badge";
 import { useEffect } from "react";
@@ -17,7 +17,6 @@ export default function ReportDetailModal({
   };
 
   useEffect(() => {
-    // Focus on the modal when it is open
     if (assignment) {
       const modalElement = document.getElementById("report-detail-modal");
       modalElement?.focus();
@@ -37,7 +36,7 @@ export default function ReportDetailModal({
       }}
     >
       <div
-        className="h-full w-full m-5 py-5 sm:w-3/4"
+        className="h-full w-full m-5 py-5 px-3 sm:px-0 sm:w-3/4"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-labelledby="modal-title"
@@ -50,7 +49,7 @@ export default function ReportDetailModal({
               id="modal-title"
               className="text-xl font-semibold text-gray-900"
             >
-              Report Details
+              Nama Pelapor:<b> {assignment?.reports.users.full_name}</b>
             </h3>
             <button
               type="button"
@@ -83,7 +82,9 @@ export default function ReportDetailModal({
                       <td className="px-6 py-4 border-r border-gray-300">
                         Judul
                       </td>
-                      <td className="px-6 py-4">{assignment.reports.title}</td>
+                      <td className="px-6 py-4 font-bold">
+                        {assignment.reports.title}
+                      </td>
                     </tr>
                     <tr className="odd:bg-white even:bg-gray-50 border-b">
                       <td className="px-6 py-4 border-r border-gray-300">
@@ -91,6 +92,33 @@ export default function ReportDetailModal({
                       </td>
                       <td className="px-6 py-4">
                         {assignment.reports.description}
+                      </td>
+                    </tr>
+                    <tr className="odd:bg-white even:bg-gray-50 border-b">
+                      <td className="px-6 py-4 border-r border-gray-300">
+                        Pelapor
+                      </td>
+                      <td className="px-6 py-4 font-bold">
+                        {assignment.reports.users.full_name}
+                      </td>
+                    </tr>
+                    <tr className="odd:bg-white even:bg-gray-50 border-b">
+                      <td className="px-6 py-4 border-r border-gray-300">
+                        Telepon Pelapor
+                      </td>
+                      <td className="px-6 py-4">
+                        {(
+                          <div className="flex gap-3 items-center">
+                            62{assignment.reports.users.phone}
+                            <a
+                              href={`tel:62${assignment.reports.users.phone}`}
+                              className="py-1 px-2 flex items-center gap-2 bg-blue-500 text-white"
+                            >
+                              <Phone />
+                              Hubungi
+                            </a>
+                          </div>
+                        ) ?? "0"}
                       </td>
                     </tr>
                     <tr className="odd:bg-white even:bg-gray-50 border-b">

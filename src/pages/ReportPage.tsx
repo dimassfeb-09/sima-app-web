@@ -33,6 +33,7 @@ export default function ReportPage({ userInfo }: { userInfo: Users | null }) {
       const reportsResponse = await fetchReportsByOrganizationId(
         organizationId
       );
+
       setReports(reportsResponse || []);
     } catch (error) {
       console.error("Failed to fetch data", error);
@@ -226,10 +227,10 @@ export default function ReportPage({ userInfo }: { userInfo: Users | null }) {
                           className="bg-red-500 text-white px-2 py-1 rounded"
                           onClick={(e) => {
                             e.stopPropagation(); // Prevent row click
-                            handleStatusChange(id, "error");
+                            handleStatusChange(id, "fiktif");
                           }}
                         >
-                          Error
+                          Fiktif
                         </button>
                       </td>
                     </tr>
