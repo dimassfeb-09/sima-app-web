@@ -106,3 +106,20 @@ export async function updateReportStatus(
   const success = assignmentsData && reportsData ? true : false;
   return success;
 }
+
+export async function updateReportOrganization(
+  reportId: number,
+  organizationId: number
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("report_assignments")
+    .update({ organization_id: organizationId })
+    .eq("id", reportId);
+
+  if (error) {
+    console.error("Error updating report assignment organization:", error.message);
+    return false;
+  }
+
+  return data ? true : false;
+}

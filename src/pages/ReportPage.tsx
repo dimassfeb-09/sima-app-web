@@ -3,71 +3,103 @@ import NavBar from "../components/NavBar";
 import { Users } from "../types/user";
 import {
   fetchReportsByOrganizationId,
+  updateReportOrganization,
   updateReportStatus,
 } from "../models/report";
-import { fetchOrganizationByUserId } from "../models/organizations";
+import {
+  fetchOrganization,
+  fetchOrganizationByUserId,
+} from "../models/organizations";
 import Badge from "../components/Badge";
 import ReportDetailModal from "../components/ReportDetailModal";
 import { Assignment } from "../types/assignment";
 import useNewReportListener from "../helpers/listeners _new_report";
 import { toast } from "react-toastify";
 import ConfirmationDialog from "../components/ConfirmDialog";
+import { Organization } from "../types/organization";
+import DropdownSearch from "../components/DropdownSearch";
 
 export default function ReportPage({ userInfo }: { userInfo: Users | null }) {
   const [reports, setReports] = useState<Assignment[]>([]);
   const [selectedAssignment, setSelectedAssignment] =
     useState<Assignment | null>(null);
+  const [organizations, setOrganizations] = useState<Organization[] | null>(
+    null
+  );
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [organizationId, setOrganizationId] = useState<number | null>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [currentReportId, setCurrentReportId] = useState<number | null>(null);
   const [newStatus, setNewStatus] = useState<string>("");
+  const [openDialogTransferReport, setOpenDialogTransferReport] =
+    useState<boolean>(false);
+  const [selectedTransferOrg, setSelectedTransferOrg] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+  const [selectedTransferReportId, setSelectedTransferReportId] = useState<
+    number | null
+  >(null);
 
   const fetchReports = async () => {
-    if (!organizationId) return;
+    if (!organization) return;
 
     setLoading(true);
-
     try {
-      const reportsResponse = await fetchReportsByOrganizationId(
-        organizationId
-      );
-
-      setReports(reportsResponse || []);
+      if (organization.id) {
+        const reportsResponse = await fetchReportsByOrganizationId(
+          organization.id
+        );
+        setReports(reportsResponse || []);
+      } else {
+        console.error("ID organisasi tidak valid");
+      }
     } catch (error) {
-      console.error("Failed to fetch data", error);
+      console.error("Gagal mengambil data", error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    const fetchOrganization = async () => {
+    const fetchOrganizationDetail = async () => {
       if (!userInfo?.id) return;
 
       try {
         const orgResponse = await fetchOrganizationByUserId(userInfo.id);
         if (orgResponse?.data) {
-          const fetchedOrganizationId = orgResponse.data.id;
-          setOrganizationId(fetchedOrganizationId!);
+          setOrganization(orgResponse?.data);
         }
       } catch (error) {
         console.error("Failed to fetch organization", error);
       }
     };
 
-    fetchOrganization();
+    const fetchOrganizations = async () => {
+      try {
+        const orgResponse = await fetchOrganization();
+        if (orgResponse?.data) {
+          setOrganizations(orgResponse.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch organization", error);
+      }
+    };
+
+    fetchOrganizations();
+    fetchOrganizationDetail();
   }, [userInfo]);
 
   useEffect(() => {
-    if (organizationId) {
+    if (organization) {
       fetchReports();
     }
-  }, [organizationId]);
+  }, [organization]);
 
   useNewReportListener({
-    organizationId: organizationId!,
+    organizationId: organization?.id!,
     onNewReport: () => {
       fetchReports();
       toast.success("Ada laporan baru");
@@ -110,6 +142,41 @@ export default function ReportPage({ userInfo }: { userInfo: Users | null }) {
     setDialogOpen(false);
   };
 
+  // Transfer confirmation handling
+  const handleTransferConfirmation = async () => {
+    if (selectedTransferOrg && selectedTransferReportId !== null) {
+      try {
+        await updateReportOrganization(
+          selectedTransferReportId,
+          selectedTransferOrg.id
+        );
+
+        setReports((prevReports) =>
+          prevReports.filter((report) => report.id != selectedTransferReportId)
+        );
+
+        toast.success(`Laporan telah dialihkan ke ${selectedTransferOrg.name}`);
+      } catch (error) {
+        // Handle any errors that occurred during the update
+        console.error("Error during report transfer:", error);
+        toast.error(
+          "Terjadi kesalahan saat memindahkan laporan. Silakan coba lagi."
+        );
+      } finally {
+        // This block will run regardless of whether an error occurred or not
+        setOpenDialogTransferReport(false);
+        setSelectedTransferOrg(null); // Reset the selected organization if needed
+        setSelectedTransferReportId(null); // Reset the selected report ID
+      }
+    }
+  };
+
+  const cancelTransfer = () => {
+    setOpenDialogTransferReport(false);
+    setSelectedTransferOrg(null); // Reset the selected organization if needed
+    setSelectedTransferReportId(null);
+  };
+
   return (
     <div className="h-screen">
       <NavBar userInfo={userInfo} />
@@ -124,9 +191,18 @@ export default function ReportPage({ userInfo }: { userInfo: Users | null }) {
       {dialogOpen && (
         <ConfirmationDialog
           isOpen={dialogOpen}
-          message={`Are you sure you want to set the status to ${newStatus}?`}
+          message={`Apakah anda yakin ingin mengubah status menjadi ${newStatus}?`}
           onConfirm={confirmStatusChange}
           onCancel={cancelStatusChange}
+        />
+      )}
+
+      {openDialogTransferReport && (
+        <ConfirmationDialog
+          isOpen={openDialogTransferReport}
+          message={`Apakah anda yakin ingin memindahkan laporan ini ke ${selectedTransferOrg?.name}?`}
+          onConfirm={handleTransferConfirmation}
+          onCancel={cancelTransfer}
         />
       )}
 
@@ -153,13 +229,16 @@ export default function ReportPage({ userInfo }: { userInfo: Users | null }) {
                 <th className="px-6 py-3 border-r border-b border-gray-300">
                   Ubah Status
                 </th>
+                <th className="px-6 py-3 border-r border-b border-gray-300">
+                  Alih Laporan
+                </th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="px-6 py-4 text-center border-t border-gray-200"
                   >
                     Loading...
@@ -233,13 +312,44 @@ export default function ReportPage({ userInfo }: { userInfo: Users | null }) {
                           Fiktif
                         </button>
                       </td>
+                      <td
+                        className="px-6 py-4 border-r border-b"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent row click
+                        }}
+                      >
+                        <DropdownSearch
+                          options={
+                            organizations
+                              ?.filter(
+                                (org) =>
+                                  org.id !== undefined &&
+                                  org.instance_type ===
+                                    organization?.instance_type
+                              )
+                              .map((org) => ({
+                                id: org.id as number, // Ensure id is a number
+                                name: org.name,
+                              })) || []
+                          }
+                          selectedOption={{
+                            id: item.organizations.id!,
+                            name: item.organizations.name,
+                          }} // Pass the current organization
+                          onSelectionChange={(selected) => {
+                            setSelectedTransferOrg(selected);
+                            setSelectedTransferReportId(item.id);
+                            setOpenDialogTransferReport(true);
+                          }}
+                        />
+                      </td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="px-6 py-4 text-center border-t border-gray-200"
                   >
                     No reports available
