@@ -157,23 +157,21 @@ export default function ReportPage({ userInfo }: { userInfo: Users | null }) {
 
         toast.success(`Laporan telah dialihkan ke ${selectedTransferOrg.name}`);
       } catch (error) {
-        // Handle any errors that occurred during the update
         console.error("Error during report transfer:", error);
         toast.error(
           "Terjadi kesalahan saat memindahkan laporan. Silakan coba lagi."
         );
       } finally {
-        // This block will run regardless of whether an error occurred or not
         setOpenDialogTransferReport(false);
-        setSelectedTransferOrg(null); // Reset the selected organization if needed
-        setSelectedTransferReportId(null); // Reset the selected report ID
+        setSelectedTransferOrg(null);
+        setSelectedTransferReportId(null);
       }
     }
   };
 
   const cancelTransfer = () => {
     setOpenDialogTransferReport(false);
-    setSelectedTransferOrg(null); // Reset the selected organization if needed
+    setSelectedTransferOrg(null);
     setSelectedTransferReportId(null);
   };
 

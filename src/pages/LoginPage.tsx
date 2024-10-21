@@ -40,8 +40,7 @@ export default function LoginPage() {
                 />
 
                 <p className="2xl:px-20">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit
-                  suspendisse.
+                  Gunakan email dan kata sandi instansi anda.
                 </p>
 
                 <span className="mt-15 inline-block">
